@@ -1,0 +1,43 @@
+version: "3.8"
+services:
+  ### frontend ####
+  client:
+    image: node:current-alpine3.17
+    container_name: client
+    command: npm run dev
+    working_dir: /var/app/client
+    volumes:
+      - ./client:/var/app/client
+    ports:
+      - 3000:3000
+    environment:
+      PORT: 3000
+  ### backend ###
+  backend:
+    image: node:current-alpine3.16
+    container_name: backend
+    command: npm run start:dev
+    working_dir: /var/app/backend
+    volumes:
+      - ./packages/backend:/var/app/backend
+    ports:
+      - 3002:3002
+    environment:
+      EXPOSE_PORT: 3002
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: kanban
+      DATABASE_USER: root
+      DATABASE_PASSWORD: root
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_USER: root
+      POSTGRES_DB: kanban
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
