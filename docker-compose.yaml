@@ -32,6 +32,7 @@ services:
       DATABASE_NAME: vacaiton
       DATABASE_USER: root
       DATABASE_PASSWORD: root
+      OPENAI_APIKEY: ${OPEN_APIKEY}
   db:
     image: postgres
     restart: always
