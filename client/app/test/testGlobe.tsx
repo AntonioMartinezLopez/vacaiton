@@ -1,34 +1,13 @@
-import React, { use } from "react";
+import React from "react";
 import { useEffect, useState, useRef, useCallback } from "react";
 import HEX_DATA from "./data/countries_hex_data.json";
 import Globe from "react-globe.gl";
-import { AmbientLight, Color, DirectionalLight, MeshPhongMaterial, SpotLight } from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { SpotLight } from "three";
 
-export default function CustomGlobe() {
+export default function CustomGlobe({ volcanoes }: any) {
 
     const globeEl = useRef<any>();
-    const ORDER_UPDATE_INTERVAL = 1000;
     const [hex, setHex] = useState<any>({ features: [] });
-    const [rendered, isRendered] = useState(false);
-    const [showGlobe, setShowGlobe] = useState(false);
-    const [volcanoes, setVolcanoes] = useState<Array<any>>([
-        {
-            "name": "Abu",
-            "country": "Japan",
-            "type": "Shield",
-            "lat": 34.5,
-            "lon": 131.6,
-            "elevation": 641
-        },
-        {
-            "name": "Acamarachi",
-            "country": "Chile",
-            "type": "Stratovolcano",
-            "lat": -23.3,
-            "lon": -67.62,
-            "elevation": 6046
-        }])
 
     useEffect(() => {
         setTimeout(() => {
@@ -57,23 +36,6 @@ export default function CustomGlobe() {
         camera.add(aLight);
 
         globe.scene().add(camera);
-
-        setInterval(() => {
-            console.log("calling")
-            if (volcanoes.length === 1) {
-                setVolcanoes([...volcanoes, {
-                    "name": "Acamarachi",
-                    "country": "Chile",
-                    "type": "Stratovolcano",
-                    "lat": -23.3,
-                    "lon": -67.62,
-                    "elevation": 6046
-                }])
-            } else {
-                setVolcanoes([volcanoes[0]])
-            }
-        }, 2000)
-
     }, []);
 
 
@@ -112,8 +74,8 @@ export default function CustomGlobe() {
     return (
         <Globe
             // ENVIRONMENT
-            backgroundColor={"rgb(15 23 42)"}
-            atmosphereColor={"#0ea5e9"}
+            backgroundColor={"rgba(0,0,0,0)"}
+            atmosphereColor={"#553C9A"}
             ref={globeEl}
             width={600}
             height={600}
@@ -128,7 +90,7 @@ export default function CustomGlobe() {
             hexPolygonsData={hex.features}
             hexPolygonResolution={useCallback(() => 3, [])} //values higher than 3 makes it buggy
             hexPolygonMargin={useCallback(() => 0.6, [])} // you can mess with this to see smaller or bigger dots
-            hexPolygonColor={useCallback(() => "#14b8a6", [])}
+            hexPolygonColor={useCallback(() => "#EE2A8F", [])}
             hexPolygonCurvatureResolution={useCallback(() => 7, [])}
         />
     );
