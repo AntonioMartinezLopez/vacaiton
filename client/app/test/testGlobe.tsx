@@ -7,23 +7,6 @@ import { AmbientLight, Color, DirectionalLight, Fog, MeshPhongMaterial, PointLig
 // Gen random data
 const N = 20;
 const arcsData = [] as object[];
-// for (let i = 0; i < N; i++) {
-//     arcsData.push({
-//         startLat: (Math.random() - 0.5) * 180,
-//         startLng: (Math.random() - 0.5) * 360,
-//         endLat: (Math.random() - 0.5) * 180,
-//         endLng: (Math.random() - 0.5) * 360,
-//         color: [['red', 'white', 'blue', 'green'][Math.round(Math.random() * 3)], ['red', 'white', 'blue', 'green'][Math.round(Math.random() * 3)]]
-//     });
-
-// }
-arcsData.push({
-    startLat: "52.520008",
-    startLng: "13.404954",
-    endLat: "40.416775",
-    endLng: "-3.703790",
-    color: "orange"
-})
 
 // custom globe material
 const globeMaterial = new MeshPhongMaterial();
@@ -33,10 +16,16 @@ globeMaterial.emissive = new Color("#160E32");
 globeMaterial.emissiveIntensity = 0.1;
 globeMaterial.shininess = 0.7;
 
-export default function CustomGlobe({ volcanoes }: any) {
+interface CustomGlobeProps {
+    arcsData: Array<Record<string, any>>,
+    setVisible?: () => void
+}
+
+export default function CustomGlobe({ arcsData, setVisible }: CustomGlobeProps) {
 
     const globeEl = useRef<any>();
     const [hex, setHex] = useState<any>({ features: [] });
+    const [globeReady, setGlobeReady] = useState<boolean>(false);
 
     useEffect(() => {
         setTimeout(() => {
@@ -51,7 +40,7 @@ export default function CustomGlobe({ volcanoes }: any) {
 
         // orbitControls
         globe.controls().autoRotate = true;
-        globe.controls().autoRotateSpeed = 1;
+        globe.controls().autoRotateSpeed = -0.4;
         globe.controls().enableZoom = false;
         globe.controls().minPolarAngle = 1;
         globe.controls().maxPolarAngle = 2;
@@ -81,45 +70,16 @@ export default function CustomGlobe({ volcanoes }: any) {
 
         camera.position.z = 350;
         camera.position.x = 0;
-        camera.position.y = 40;
+        camera.position.y = 100;
 
         globe.scene().add(camera);
-
-        console.log(globe)
+        setGlobeReady(true);
     }, []);
 
-
-
-    // useEffect(() => {
-    //     // Globe Controls
-    //     globeRef.current!.controls().autoRotate = true;
-    //     globeRef.current!.controls().autoRotateSpeed = 1;
-
-    //     if (globeRef.current !== undefined && window !== undefined) {
-    //         const scene = globeRef.current.scene();
-    //         if (scene.children.length >= 3) {
-    //             // Lighting
-    //             let AmbientLight: AmbientLight = scene.children[1];
-    //             AmbientLight.intensity = 20;
-    //             AmbientLight.castShadow = false;
-
-    //             // let DirectionalLight: DirectionalLight = scene.children[2];
-    //             // DirectionalLight.intensity = 30;
-    //             // DirectionalLight.position.set(-2, 2, -2);
-
-    //             // DirectionalLight.castShadow = false;
-    //             // console.log(scene);
-    //         }
-
-    //         const controls: OrbitControls = globeRef.current.controls();
-    //         if (controls) {
-    //             controls.enableZoom = false;
-    //             controls.maxDistance = 350;
-    //         }
-    //     } else {
-    //         console.log("Not defined");
-    //     }
-    // }, [rendered]);
+    useEffect(() => {
+        const globe = globeEl.current;
+        globe.pointOfView({ lat: "39.099724", lng: "-94.578331" }, 5000)
+    }, [globeReady])
 
     return (
         <Globe
@@ -133,9 +93,7 @@ export default function CustomGlobe({ volcanoes }: any) {
             atmosphereAltitude={0.35}
             showGlobe={true}
             globeMaterial={globeMaterial}
-            pointsData={volcanoes}
-            pointLat="lat"
-            pointLng="lon"
+            animateIn={true}
             // COUNTRIES
             hexPolygonsData={hex.features}
             hexPolygonResolution={useCallback(() => 3, [])} //values higher than 3 makes it buggy
@@ -144,13 +102,15 @@ export default function CustomGlobe({ volcanoes }: any) {
             hexPolygonCurvatureResolution={useCallback(() => 7, [])}
             //ARCS
             arcsData={arcsData}
-            arcColor={'color'}
-            arcDashLength={() => 1}
-            arcDashGap={() => 1}
-            arcDashAnimateTime={() => 600}
-            arcAltitude={() => 0.1}
-            arcCircularResolution={10}
-            arcStroke={() => 1}
+            arcColor={() => '#efdefa'}
+            arcDashLength={() => 0.7}
+            arcDashGap={() => 0.7}
+            arcDashInitialGap={1}
+            arcDashAnimateTime={() => 2000}
+            arcAltitudeAutoScale={() => 0.2}
+            //arcAltitude={() => 0.05}
+            arcCircularResolution={4}
+            arcStroke={() => 0.7}
         />
     );
 }
