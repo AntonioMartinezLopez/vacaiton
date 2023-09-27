@@ -1,7 +1,8 @@
 'use client'
 
+import { motion, MotionValue, useScroll, useSpring, useTransform } from 'framer-motion';
 import dynamic from 'next/dynamic';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 const TestGlobe = dynamic(() => import('./testGlobe'), {
   ssr: false
@@ -138,9 +139,41 @@ const trips: Record<string, object[]> = {
   ]
 }
 
+// function useParallax(value: MotionValue<number>, distance: number) {
+//   return useTransform(value, [0, 1], [-distance, distance]);
+// }
+
+// function Section({ id }: { id: number }) {
+//   const ref = useRef(null);
+//   const height = useRef(0);
+
+//   const { scrollYProgress } = useScroll({ target: ref });
+//   const y = useParallax(scrollYProgress, 0);
+
+//   return (
+//     <section className='h-screen w-full flex flex-row snap-center relative'>
+//       <div ref={ref} className="h-[400px] relative">
+//       </div>
+//       <motion.h2 style={{ y }}>{`#00${id}`}</motion.h2>
+
+//     </section>
+//   );
+// }
+
 export default function Home() {
 
-  const [arcsData, setArcsData] = useState([] as Array<object>)
+  const [arcsData, setArcsData] = useState([] as Array<object>);
+  const refSectionOne = useRef<HTMLDivElement>(null);
+
+  const { scrollYProgress, scrollY } = useScroll({ container: refSectionOne });
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  })
+
+  useEffect(() => { console.log(scrollYProgress, scrollY) }, [scrollYProgress, scrollY])
+
 
   useEffect(() => {
     setTimeout(() => {
@@ -191,16 +224,33 @@ export default function Home() {
       })
     }, 4000)
 
+
+
+
   }, [])
 
+
+
+
   return (
-    <>
-      <div className="h-full">
-        <div className='h-full w-full flex flex-row'>
-          Welcome to Vacaiton!
-          <TestGlobe arcsData={arcsData}></TestGlobe>
-        </div>
-      </div>
-    </>
+    <div ref={refSectionOne} className='snap-y snap-mandatory overflow-y-auto overflow-hidden h-screen scroll-smooth'>
+
+      <section className='h-screen w-full text-gray-100 flex flex-row snap-center relative'>
+        Welcome to Vacaiton!
+        {/* <TestGlobe arcsData={arcsData}></TestGlobe> */}
+      </section>
+
+      <section className='h-screen w-full text-gray-100 flex flex-row snap-center relative'>
+        Welcome to Vacaiton!
+      </section>
+
+      <section className='h-screen w-full text-gray-100 flex flex-row snap-center relative'>
+        Welcome to Vacaiton!
+      </section>
+      {/* <Section id={1}></Section>
+      <Section id={2}></Section>
+      <Section id={3}></Section> */}
+      <motion.div className="fixed bottom-0 left-0 right-0 h-2 bg-amber-700 origin-[0%]" style={{ scaleX }}>{scrollYProgress}</motion.div>
+    </div>
   )
 }
