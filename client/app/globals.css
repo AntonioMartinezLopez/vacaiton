@@ -19,5 +19,4 @@
 body {
   color: rgb(var(--foreground-rgb));
   height: 100vh;
-  margin: 0 10%;
 }

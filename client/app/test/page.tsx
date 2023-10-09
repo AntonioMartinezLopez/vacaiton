@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, MotionValue, useScroll, useSpring, useTransform } from 'framer-motion';
+import { motion, MotionValue, useInView, useScroll, useSpring, useTransform } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import React, { useEffect, useRef, useState } from 'react'
 
@@ -163,9 +163,17 @@ const trips: Record<string, object[]> = {
 export default function Home() {
 
   const [arcsData, setArcsData] = useState([] as Array<object>);
-  const refSectionOne = useRef<HTMLDivElement>(null);
+  const refContainer = React.useRef<HTMLDivElement>(null);
+  const refSection1 = React.useRef<HTMLDivElement>(null);
+  const refSection2 = React.useRef<HTMLDivElement>(null);
+  const refSection3 = React.useRef<HTMLDivElement>(null);
 
-  const { scrollYProgress, scrollY } = useScroll({ container: refSectionOne });
+  const refOneInView = useInView(refSection1);
+  const refTwoInView = useInView(refSection1);
+  const refThreeInView = useInView(refSection1);
+
+  const { scrollYProgress, scrollY } = useScroll({ container: refContainer });
+  const isInView = useInView(refContainer)
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
@@ -174,6 +182,16 @@ export default function Home() {
 
   useEffect(() => { console.log(scrollYProgress, scrollY) }, [scrollYProgress, scrollY])
 
+  useEffect(() => { console.log(isInView) }, [isInView])
+
+  useEffect(() => {
+
+    if (refOneInView) {
+      //focus to North America
+    }
+    else if (refOneInView) { }
+
+  }, [refOneInView, refTwoInView, refThreeInView])
 
   useEffect(() => {
     setTimeout(() => {
@@ -233,24 +251,26 @@ export default function Home() {
 
 
   return (
-    <div ref={refSectionOne} className='snap-y snap-mandatory overflow-y-auto overflow-hidden h-screen scroll-smooth'>
+    <div ref={refContainer} className="relative snap-y snap-mandatory overflow-y-auto overflow-hidden h-screen scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
 
-      <section className='h-screen w-full text-gray-100 flex flex-row snap-center relative'>
+      <section ref={refSection1} className='h-screen w-full text-gray-100 flex flex-row snap-center relative bg-gradient-to-r from-slate-800 to-slate-900 dark:bg-slate-900'>
         Welcome to Vacaiton!
-        {/* <TestGlobe arcsData={arcsData}></TestGlobe> */}
+        {/* <TestGlobe arcsData={arcsData} setVisible={() => null}></TestGlobe> */}
       </section>
 
-      <section className='h-screen w-full text-gray-100 flex flex-row snap-center relative'>
+      <section ref={refSection2} className='h-screen w-full text-gray-100 flex flex-row snap-center relative bg-gradient-to-r from-slate-800 to-slate-900 dark:bg-slate-900'>
         Welcome to Vacaiton!
       </section>
 
-      <section className='h-screen w-full text-gray-100 flex flex-row snap-center relative'>
+      <section ref={refSection3} className='h-screen w-full text-gray-100 flex flex-row snap-center relative bg-gradient-to-r from-slate-800 to-slate-900 dark:bg-slate-900'>
         Welcome to Vacaiton!
       </section>
       {/* <Section id={1}></Section>
       <Section id={2}></Section>
       <Section id={3}></Section> */}
-      <motion.div className="fixed bottom-0 left-0 right-0 h-2 bg-amber-700 origin-[0%]" style={{ scaleX }}>{scrollYProgress}</motion.div>
-    </div>
+      <motion.div className="fixed bottom-0 left-0 right-0 h-1 origin-[0%] bg-gradient-to-r from-cyan-600 to-cyan-700" style={{ scaleX }}></motion.div>
+      <div className='fixed w-[50%] right-0 h-screen top-0 z-10 flex flex-row items-center'><TestGlobe arcsData={arcsData} setVisible={() => console.log("loaded")} pointOfView={{ lat: "39.099724", long: "-94.578331" }}></TestGlobe></div>
+
+    </div >
   )
 }

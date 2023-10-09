@@ -11,21 +11,29 @@ const arcsData = [] as object[];
 // custom globe material
 const globeMaterial = new MeshPhongMaterial();
 globeMaterial.bumpScale = 10;
-globeMaterial.color = new Color("#160E32");
-globeMaterial.emissive = new Color("#160E32");
+globeMaterial.color = new Color("#01232e");
+globeMaterial.emissive = new Color("#012b38");
 globeMaterial.emissiveIntensity = 0.1;
 globeMaterial.shininess = 0.7;
 
-interface CustomGlobeProps {
-    arcsData: Array<Record<string, any>>,
-    setVisible?: () => void
+interface Coordinate {
+    lat: string,
+    long: string
 }
 
-export default function CustomGlobe({ arcsData, setVisible }: CustomGlobeProps) {
+interface CustomGlobeProps {
+    arcsData: Array<Record<string, any>>,
+    setVisible: () => void
+    pointOfView: Coordinate
+}
+
+export default function CustomGlobe({ arcsData, setVisible, pointOfView }: CustomGlobeProps) {
 
     const globeEl = useRef<any>();
+    const wrapperRef = useRef<any>();
     const [hex, setHex] = useState<any>({ features: [] });
     const [globeReady, setGlobeReady] = useState<boolean>(false);
+    const [format, setFormat] = useState({ width: 0, height: 0 })
 
     useEffect(() => {
         setTimeout(() => {
@@ -74,43 +82,54 @@ export default function CustomGlobe({ arcsData, setVisible }: CustomGlobeProps) 
 
         globe.scene().add(camera);
         setGlobeReady(true);
+        setVisible();
     }, []);
 
     useEffect(() => {
         const globe = globeEl.current;
-        globe.pointOfView({ lat: "39.099724", lng: "-94.578331" }, 5000)
-    }, [globeReady])
+        globe.pointOfView({ lat: pointOfView.lat, lng: pointOfView.long }, 3000)
+    }, [pointOfView])
+
+    useEffect(() => {
+        if (wrapperRef.current) {
+            console.log(wrapperRef.current.offsetHeight)
+            setFormat(() => { return { height: wrapperRef.current.offsetWidth, width: wrapperRef.current.offsetWidth } }
+            )
+        }
+    }, [wrapperRef])
 
     return (
-        <Globe
-            // ENVIRONMENT
-            backgroundColor={"rgba(0,0,0,0)"}
-            atmosphereColor={"#3a228a"}
-            ref={globeEl}
-            width={600}
-            height={600}
-            waitForGlobeReady={true}
-            atmosphereAltitude={0.35}
-            showGlobe={true}
-            globeMaterial={globeMaterial}
-            animateIn={true}
-            // COUNTRIES
-            hexPolygonsData={hex.features}
-            hexPolygonResolution={useCallback(() => 3, [])} //values higher than 3 makes it buggy
-            hexPolygonMargin={useCallback(() => 0.6, [])} // you can mess with this to see smaller or bigger dots
-            hexPolygonColor={useCallback(() => "rgba(255, 255, 255, 1)", [])}
-            hexPolygonCurvatureResolution={useCallback(() => 7, [])}
-            //ARCS
-            arcsData={arcsData}
-            arcColor={() => '#efdefa'}
-            arcDashLength={() => 0.7}
-            arcDashGap={() => 0.7}
-            arcDashInitialGap={1}
-            arcDashAnimateTime={() => 2000}
-            arcAltitudeAutoScale={() => 0.2}
-            //arcAltitude={() => 0.05}
-            arcCircularResolution={4}
-            arcStroke={() => 0.7}
-        />
+        <div className="w-full h-full flex flex-row items-center" ref={wrapperRef}>
+            <Globe
+                // ENVIRONMENT
+                backgroundColor={"rgba(0,0,0,0)"}
+                atmosphereColor={"#36a1c2"}
+                ref={globeEl}
+                width={format.width}
+                height={format.height}
+                waitForGlobeReady={true}
+                atmosphereAltitude={0.25}
+                showGlobe={true}
+                globeMaterial={globeMaterial}
+                animateIn={true}
+                // COUNTRIES
+                hexPolygonsData={hex.features}
+                hexPolygonResolution={useCallback(() => 3, [])} //values higher than 3 makes it buggy
+                hexPolygonMargin={useCallback(() => 0.6, [])} // you can mess with this to see smaller or bigger dots
+                hexPolygonColor={useCallback(() => "#636363", [])}
+                hexPolygonCurvatureResolution={useCallback(() => 7, [])}
+                //ARCS
+                arcsData={arcsData}
+                arcColor={() => '#efdefa'}
+                arcDashLength={() => 0.7}
+                arcDashGap={() => 0.7}
+                arcDashInitialGap={1}
+                arcDashAnimateTime={() => 2000}
+                arcAltitudeAutoScale={() => 0.2}
+                //arcAltitude={() => 0.05}
+                arcCircularResolution={4}
+                arcStroke={() => 0.7}
+            />
+        </div>
     );
 }
