@@ -16,14 +16,16 @@ func DecodeJSON(r io.Reader, obj interface{}) error {
 }
 
 func ServeJson(data interface{}) []byte {
-	err, _ := json.Marshal(data)
-	if err != nil {
-		return err
+	value, _ := json.Marshal(data)
+	if value != nil {
+		return value
 	}
 	return nil
 }
 
 func HttpResponse(data interface{}, w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(&data)
+	if error := json.NewEncoder(w).Encode(&data); error != nil {
+		println(error.Error())
+	}
 }

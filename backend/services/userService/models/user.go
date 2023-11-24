@@ -11,3 +11,10 @@ type User struct {
 	CreatedAt *time.Time `json:"created_at,string,omitempty"`
 	UpdatedAt *time.Time `json:"updated_at_at,string,omitempty"`
 }
+
+type RegisterUserInput struct {
+	Firstname string `json:"firstname" binding:"required"`
+	Lastname  string `json:"lastname" binding:"required"`
+	Email     string `json:"email" bindinig:"required"`
+	Password  string `json:"password" binding:"required"`
+}
