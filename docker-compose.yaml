@@ -41,6 +41,13 @@ services:
       - 5000:5000
     volumes:
       - ./backend:/app
+    environment:
+      USERSERVICE_PORT: 5001
+      USERSERVICE_SECRET: gf37d2c!_edezb2
+      USERSERVICE_DB_HOST: postgres
+      USERSERVICE_DB_NAME: user
+      USERSERVICE_DB_USER: userservice
+      USERSERVICE_DB_PASSWORD: userservice
     restart: always
   db:
     image: postgres
