@@ -1,6 +1,7 @@
 package main
 
 import (
+	"backend/pkg/database"
 	"backend/pkg/jsonHelper"
 	"backend/pkg/logger"
 	"backend/services/userService/config"
@@ -12,11 +13,23 @@ import (
 
 func main() {
 
+	// Check configuration and for all env variables
 	if _, configError := config.SetupConfig(); configError != nil {
 		logger.Fatal(configError.Error())
 	}
 
+	// Get server configuration
 	config.ServerConfig()
+
+	// Generate data source name for database connection
+	postgresDsn := config.GetDSNConfig()
+
+	// create database connection and watch for connection
+	db, err := database.DBConnection(postgresDsn)
+	if err != nil {
+		logger.Fatal("%v", err)
+	}
+	go database.WatchDBConnection(db)
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)

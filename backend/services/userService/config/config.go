@@ -9,29 +9,13 @@ import (
 	"github.com/spf13/viper"
 )
 
-type DatabaseConfiguration struct {
-	Dbname   string
-	Username string
-	Password string
-	Host     string
-	Port     string
-	LogMode  bool
-}
-
-type ServerConfiguration struct {
-	Port                 string
-	Secret               string
-	LOG_LEVEL            string
-	LimitCountPerRequest int64
-}
-
 type Configuration struct {
 	Port                 string
 	Secret               string
 	LimitCountPerRequest int64
 	Log_Level            string
 	Db_name              string
-	Db_Username          string
+	Db_User              string
 	Db_Password          string `json:"-"`
 	Db_Host              string
 	Db_Port              string
@@ -50,8 +34,8 @@ func SetupConfig() (Configuration, error) {
 	viper.SetDefault("LOG_LEVEL", "DEBUG")
 	viper.SetDefault("HOST", "0.0.0.0")
 	viper.SetDefault("DB_PORT", 5432)
-	viper.SetDefault("DB_LOG_MODE", true)
-	viper.SetDefault("DB_SSL_MODE", "disable")
+	viper.SetDefault("DB_LOGMODE", true)
+	viper.SetDefault("DB_SSLMODE", "disable")
 
 	// Load all variables with specified prefix and overwrite default values
 	viper.AutomaticEnv()
@@ -85,4 +69,20 @@ func ServerConfig() string {
 	appServer := fmt.Sprintf("%s:%s", viper.GetString("HOST"), viper.GetString("PORT"))
 	logger.Log("Server Running at %s", appServer)
 	return appServer
+}
+
+func GetDSNConfig() string {
+	DbName := viper.GetString("DB_NAME")
+	DbUser := viper.GetString("DB_USER")
+	DbPassword := viper.GetString("DB_PASSWORD")
+	DbHost := viper.GetString("DB_HOST")
+	DbPort := viper.GetString("DB_PORT")
+	DbSslMode := viper.GetString("SSLMODE")
+
+	masterDSN := fmt.Sprintf(
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
+		DbHost, DbUser, DbPassword, DbName, DbPort, DbSslMode,
+	)
+
+	return masterDSN
 }

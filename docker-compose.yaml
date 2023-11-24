@@ -44,7 +44,7 @@ services:
     environment:
       USERSERVICE_PORT: 5001
       USERSERVICE_SECRET: gf37d2c!_edezb2
-      USERSERVICE_DB_HOST: postgres
+      USERSERVICE_DB_HOST: db
       USERSERVICE_DB_NAME: user
       USERSERVICE_DB_USER: userservice
       USERSERVICE_DB_PASSWORD: userservice
@@ -53,9 +53,11 @@ services:
     image: postgres
     restart: always
     environment:
-      POSTGRES_PASSWORD: root
-      POSTGRES_USER: root
-      POSTGRES_DB: vacaiton
+      POSTGRES_PASSWORD: userservice
+      POSTGRES_USER: userservice
+      POSTGRES_DB: user
+    ports:
+      - 5432:5432
   adminer:
     image: adminer
     restart: always
