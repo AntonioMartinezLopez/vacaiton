@@ -2,13 +2,12 @@ package main
 
 import (
 	"backend/pkg/database"
-	"backend/pkg/jsonHelper"
 	"backend/pkg/logger"
 	"backend/services/userService/config"
+	"backend/services/userService/migrations"
+	"backend/services/userService/routers"
 	"net/http"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"time"
 )
 
 func main() {
@@ -29,17 +28,18 @@ func main() {
 	if err != nil {
 		logger.Fatal("%v", err)
 	}
-	go database.WatchDBConnection(db)
 
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		response := struct {
-			Status  string
-			Message string
-		}{Status: "alive", Message: "Hello World!"}
-		jsonHelper.HttpResponse(&response, w)
-	})
+	migrations.Migrate(db)
 
-	http.ListenAndServe(":5000", r)
+	// Initialize Router
+	router := routers.SetupRouter(db)
+	server := http.Server{
+		Addr:              config.ServerConfig(),
+		Handler:           router,
+		ReadTimeout:       5 * time.Second,
+		WriteTimeout:      5 * time.Second,
+		IdleTimeout:       30 * time.Second,
+		ReadHeaderTimeout: 2 * time.Second,
+	}
+	logger.Fatal("%v", server.ListenAndServe())
 }

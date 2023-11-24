@@ -36,7 +36,12 @@ func DBConnection(dsn string) (*DB, error) {
 	}
 	logger.Log("Connected to database")
 
-	return &DB{Database: db}, nil
+	DBConnection := &DB{Database: db}
+
+	// Start watcher
+	go WatchDBConnection(DBConnection)
+
+	return DBConnection, nil
 }
 
 func WatchDBConnection(db *DB) error {
@@ -51,9 +56,9 @@ func WatchDBConnection(db *DB) error {
 		if error != nil {
 			timeoutCount += 1
 			if timeoutCount == 5 {
-				logger.Fatal("Connection to database failed after trying to reconnect 5 times. Stopping application ")
+				logger.Fatal("Connection to database failed after trying to reconnect 5 times. Stopping application.")
 			}
-			logger.Error("Connection to database lost. Try to reconnect %v", timeoutCount)
+			logger.Error("Connection to database lost. Try to reconnect. Number of reconnection attempts: %v.", timeoutCount)
 			time.Sleep(time.Second * 5)
 			continue
 		}
