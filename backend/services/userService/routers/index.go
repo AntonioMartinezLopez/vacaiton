@@ -12,6 +12,8 @@ func RegisterRoutes(router *chi.Mux, db *database.DB) {
 		w.Write([]byte("\"live\": \"ok\""))
 	})
 
-	// Add routes
-	UserRoutes(router, db)
+	router.Route("/api", func(r chi.Router) {
+		// Add routes
+		UserRoutes(r, db)
+	})
 }

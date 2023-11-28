@@ -8,11 +8,16 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func UserRoutes(router *chi.Mux, db *database.DB) {
+func UserRoutes(router chi.Router, db *database.DB) {
 	repo := repository.NewGormRepository(db)
 	userController := controller.NewUserHandler(repo)
-	router.Group(func(r chi.Router) {
-		r.Post("/create", userController.CreateUser)
 
+	router.Route("/auth", func(r chi.Router) {
+		r.Post("/signup", userController.CreateUser)
+		r.Get("/{user_id}", userController.GetUserInfo)
+		r.Post("/login", userController.LoginUser)
+		r.Post("/logout", userController.LogoutUser)
+		r.Get("/", userController.CheckTokenValid)
 	})
+
 }

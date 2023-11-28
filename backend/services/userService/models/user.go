@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type User struct {
 	Id        int        `json:"id"`
@@ -15,6 +17,11 @@ type User struct {
 type RegisterUserInput struct {
 	Firstname string `json:"firstname" binding:"required"`
 	Lastname  string `json:"lastname" binding:"required"`
-	Email     string `json:"email" bindinig:"required"`
+	Email     string `json:"email" binding:"required"`
 	Password  string `json:"password" binding:"required"`
+}
+
+type SignUpUserInput struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
