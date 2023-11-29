@@ -24,7 +24,7 @@ type Configuration struct {
 
 func SetupConfig() (Configuration, error) {
 
-	var configuration *Configuration
+	var configuration *Configuration = new(Configuration)
 
 	// Set Prefix for env variables so only the needed variables are being read
 	viper.SetEnvPrefix("USERSERVICE")
@@ -41,7 +41,7 @@ func SetupConfig() (Configuration, error) {
 	viper.AutomaticEnv()
 
 	// check if obligatory envs are given and set them
-	obligatoryEnvs := []string{"SECRET", "DB_HOST", "DB_NAME", "DB_USER", "DB_PASSWORD"}
+	obligatoryEnvs := []string{"SECRET", "DB_HOST", "DB_NAME", "DB_USER", "DB_PASSWORD", "OAUTH_GOOGLE_ID", "OAUTH_GOOGLE_KEY"}
 
 	for _, s := range obligatoryEnvs {
 		valueExists := viper.IsSet(s)

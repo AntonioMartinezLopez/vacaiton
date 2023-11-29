@@ -48,6 +48,8 @@ services:
       USERSERVICE_DB_NAME: user
       USERSERVICE_DB_USER: userservice
       USERSERVICE_DB_PASSWORD: userservice
+      USERSERVICE_OAUTH_GOOGLE_ID: ${OAUTH_GOOGLE_ID}
+      USERSERVICE_OAUTH_GOOGLE_KEY: ${OAUTH_GOOGLE_KEY}
     restart: always
   db:
     image: postgres
