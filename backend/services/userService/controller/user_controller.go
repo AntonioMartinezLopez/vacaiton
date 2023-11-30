@@ -2,7 +2,7 @@ package controller
 
 import (
 	"backend/pkg/jsonHelper"
-	"backend/pkg/logger"
+	"backend/services/userService/jwtHelper"
 	"backend/services/userService/models"
 	"backend/services/userService/repository"
 	"encoding/json"
@@ -12,7 +12,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -76,11 +75,10 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, request *http.Request) {
 	}
 
 	// Get user info
-	logger.Info(userInput.Email)
 	user, error := h.repo.GetUserByMail(userInput.Email)
 
 	if error != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		http.Error(w, error.Error(), http.StatusNotFound)
 		return
 	}
 
@@ -89,33 +87,15 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, request *http.Request) {
 
 	if passwordCheckError != nil {
 		http.Error(w, passwordCheckError.Error(), http.StatusUnauthorized)
+		return
 	}
 
-	// Create JWT Token and Sign it
-	expirationTime := time.Now().Add(time.Minute * 20)
+	// Generate JWT token
+	jwtError := jwtHelper.CreateJwtToken(w, strconv.Itoa(user.Id), user.Email)
 
-	claims := &models.Claims{
-		UserId: strconv.Itoa(user.Id),
-		Email:  user.Email,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(expirationTime),
-		},
+	if jwtError != nil {
+		http.Error(w, jwtError.Error(), http.StatusInternalServerError)
 	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signingSecret := viper.GetString("SECRET")
-	signedToken, err := token.SignedString([]byte(signingSecret))
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
-	// Add jwt token as cookie
-	http.SetCookie(w, &http.Cookie{
-		Name:    "token",
-		Value:   signedToken,
-		Expires: expirationTime,
-	})
 
 	jsonHelper.HttpResponse(&models.AuthResponse{Status: models.LoggedIn}, w)
 }
@@ -124,6 +104,7 @@ func (h *UserHandler) LogoutUser(w http.ResponseWriter, request *http.Request) {
 
 	http.SetCookie(w, &http.Cookie{
 		Name:    "token",
+		Path:    "/",
 		Expires: time.Now(),
 	})
 
@@ -147,9 +128,7 @@ func (h *UserHandler) CheckTokenValid(w http.ResponseWriter, request *http.Reque
 	jwtString := c.Value
 	claims := &models.Claims{}
 
-	token, err := jwt.ParseWithClaims(jwtString, claims, func(t *jwt.Token) (any, error) {
-		return []byte(viper.GetString("SECRET")), nil
-	})
+	token, err := jwtHelper.CheckTokenValid(jwtString, claims)
 
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
@@ -163,6 +142,13 @@ func (h *UserHandler) CheckTokenValid(w http.ResponseWriter, request *http.Reque
 	if !token.Valid {
 		http.Error(w, "Invalid token.", http.StatusUnauthorized)
 		return
+	}
+
+	// Renew token
+	renewalError := jwtHelper.CreateJwtToken(w, claims.UserId, claims.Email)
+
+	if renewalError != nil {
+		http.Error(w, renewalError.Error(), http.StatusInternalServerError)
 	}
 
 	jsonHelper.HttpResponse(&models.AuthResponse{Status: models.LoggedIn}, w)

@@ -15,8 +15,8 @@ func UserRoutes(router chi.Router, db *database.DB) {
 	router.Route("/auth", func(r chi.Router) {
 		r.Post("/signup", userController.CreateUser)
 		r.Get("/{user_id}", userController.GetUserInfo)
-		r.Post("/login", userController.LoginUser)
-		r.Post("/logout", userController.LogoutUser)
+		r.Get("/login", userController.LoginUser)
+		r.Get("/logout", userController.LogoutUser)
 		r.Get("/", userController.CheckTokenValid)
 	})
 
