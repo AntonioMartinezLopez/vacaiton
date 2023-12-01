@@ -19,5 +19,4 @@ func UserRoutes(router chi.Router, db *database.DB) {
 		r.Get("/logout", userController.LogoutUser)
 		r.Get("/", userController.CheckTokenValid)
 	})
-
 }

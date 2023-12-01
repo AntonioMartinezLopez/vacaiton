@@ -34,7 +34,7 @@ func NewOauthHandler(repo repository.UserRepo) *OauthHandler {
 func (h *OauthHandler) OauthCallback(w http.ResponseWriter, request *http.Request) {
 	user, err := gothic.CompleteUserAuth(w, request)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		jsonHelper.HttpErrorResponse(w, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -42,7 +42,8 @@ func (h *OauthHandler) OauthCallback(w http.ResponseWriter, request *http.Reques
 	jwtError := jwtHelper.CreateJwtToken(w, user.UserID, user.Email)
 
 	if jwtError != nil {
-		http.Error(w, jwtError.Error(), http.StatusInternalServerError)
+		jsonHelper.HttpErrorResponse(w, http.StatusInternalServerError, jwtError)
+		return
 	}
 
 	// TO DO: change line and redirect to root page of the application
@@ -63,7 +64,8 @@ func (h *OauthHandler) OauthInit(w http.ResponseWriter, request *http.Request) {
 		jwtError := jwtHelper.CreateJwtToken(w, user.UserID, user.Email)
 
 		if jwtError != nil {
-			http.Error(w, jwtError.Error(), http.StatusInternalServerError)
+			jsonHelper.HttpErrorResponse(w, http.StatusInternalServerError, jwtError)
+			return
 		}
 		jsonHelper.HttpResponse(&models.AuthResponse{Status: models.LoggedIn}, w)
 

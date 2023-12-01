@@ -6,6 +6,7 @@ import (
 	"backend/services/userService/models"
 	"backend/services/userService/repository"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -26,42 +27,39 @@ func NewUserHandler(repo repository.UserRepo) *UserHandler {
 }
 
 func (h *UserHandler) GetUserInfo(w http.ResponseWriter, request *http.Request) {
+
 	requestedId := chi.URLParam(request, "user_id")
 
+	// Try to retrieve user info based on given id
 	if requestedId != "" {
-
 		user, error := h.repo.GetUserById(requestedId)
-
 		if error != nil {
-			http.Error(w, error.Error(), http.StatusNotFound)
+			jsonHelper.HttpErrorResponse(w, http.StatusNotFound, error)
 			return
 		}
-
 		jsonHelper.HttpResponse(user, w)
-
 	}
 }
 
 func (h *UserHandler) CreateUser(w http.ResponseWriter, request *http.Request) {
+
+	// Validate Input
 	userInput := new(models.RegisterUserInput)
 	err := json.NewDecoder(request.Body).Decode(&userInput)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		jsonHelper.HttpErrorResponse(w, http.StatusBadRequest, err)
 		return
 	}
 
+	// Create User
 	id, err := h.repo.RegisterUser(userInput)
-
-	w.Header().Set("Content-Type", "application/json")
-
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		jsonHelper.HttpErrorResponse(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonHelper.HttpResponse(struct {
-		UserId int
-	}{UserId: id}, w)
+	// Return result
+	jsonHelper.HttpResponse(&models.RegisterUserOutput{UserId: id}, w)
 }
 
 func (h *UserHandler) LoginUser(w http.ResponseWriter, request *http.Request) {
@@ -70,7 +68,7 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, request *http.Request) {
 	userInput := new(models.SignUpUserInput)
 	err := json.NewDecoder(request.Body).Decode(&userInput)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		jsonHelper.HttpErrorResponse(w, http.StatusBadRequest, err)
 		return
 	}
 
@@ -78,7 +76,7 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, request *http.Request) {
 	user, error := h.repo.GetUserByMail(userInput.Email)
 
 	if error != nil {
-		http.Error(w, error.Error(), http.StatusNotFound)
+		jsonHelper.HttpErrorResponse(w, http.StatusNotFound, error)
 		return
 	}
 
@@ -86,7 +84,7 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, request *http.Request) {
 	passwordCheckError := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userInput.Password))
 
 	if passwordCheckError != nil {
-		http.Error(w, passwordCheckError.Error(), http.StatusUnauthorized)
+		jsonHelper.HttpErrorResponse(w, http.StatusUnauthorized, passwordCheckError)
 		return
 	}
 
@@ -94,7 +92,8 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, request *http.Request) {
 	jwtError := jwtHelper.CreateJwtToken(w, strconv.Itoa(user.Id), user.Email)
 
 	if jwtError != nil {
-		http.Error(w, jwtError.Error(), http.StatusInternalServerError)
+		jsonHelper.HttpErrorResponse(w, http.StatusInternalServerError, jwtError)
+		return
 	}
 
 	jsonHelper.HttpResponse(&models.AuthResponse{Status: models.LoggedIn}, w)
@@ -113,34 +112,34 @@ func (h *UserHandler) LogoutUser(w http.ResponseWriter, request *http.Request) {
 
 func (h *UserHandler) CheckTokenValid(w http.ResponseWriter, request *http.Request) {
 
-	// obtain token from cookies
+	// Obtain token from cookies
 	c, err := request.Cookie("token")
 
 	if err != nil {
 		if err == http.ErrNoCookie {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			jsonHelper.HttpErrorResponse(w, http.StatusUnauthorized, err)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		jsonHelper.HttpErrorResponse(w, http.StatusBadRequest, err)
 		return
 	}
 
+	// Validate token
 	jwtString := c.Value
 	claims := &models.Claims{}
-
 	token, err := jwtHelper.CheckTokenValid(jwtString, claims)
 
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			jsonHelper.HttpErrorResponse(w, http.StatusUnauthorized, err)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		jsonHelper.HttpErrorResponse(w, http.StatusBadRequest, err)
 		return
 	}
 
 	if !token.Valid {
-		http.Error(w, "Invalid token.", http.StatusUnauthorized)
+		jsonHelper.HttpErrorResponse(w, http.StatusUnauthorized, errors.New("Invalid token."))
 		return
 	}
 
@@ -148,7 +147,7 @@ func (h *UserHandler) CheckTokenValid(w http.ResponseWriter, request *http.Reque
 	renewalError := jwtHelper.CreateJwtToken(w, claims.UserId, claims.Email)
 
 	if renewalError != nil {
-		http.Error(w, renewalError.Error(), http.StatusInternalServerError)
+		jsonHelper.HttpErrorResponse(w, http.StatusInternalServerError, renewalError)
 	}
 
 	jsonHelper.HttpResponse(&models.AuthResponse{Status: models.LoggedIn}, w)

@@ -25,3 +25,7 @@ type SignUpUserInput struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
+
+type RegisterUserOutput struct {
+	UserId int `json:"userId" binding:"required"`
+}

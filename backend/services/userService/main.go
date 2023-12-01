@@ -10,15 +10,27 @@ import (
 	"time"
 )
 
+//	@title			User/Auth API
+//	@version		1.0
+//	@description	This server is used for creating new users and conduct authentication
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	Vacaition API Support
+//	@contact.url	http://www.swagger.io/support
+//	@contact.email	support@swagger.io
+
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+
+//	@host		vacaition.userService.swagger.io
+//	@BasePath	/api
+
 func main() {
 
 	// Check configuration and for all env variables
 	if _, configError := config.SetupConfig(); configError != nil {
 		logger.Fatal(configError.Error())
 	}
-
-	// Get server configuration
-	config.ServerConfig()
 
 	// Generate data source name for database connection
 	postgresDsn := config.GetDSNConfig()

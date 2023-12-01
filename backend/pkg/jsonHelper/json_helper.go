@@ -29,3 +29,21 @@ func HttpResponse(data interface{}, w http.ResponseWriter) {
 		println(error.Error())
 	}
 }
+
+func HttpErrorResponse(w http.ResponseWriter, status int, err error) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	httpErr := HTTPError{
+		Code:    status,
+		Message: err.Error(),
+	}
+	if error := json.NewEncoder(w).Encode(&httpErr); error != nil {
+		println(error.Error())
+	}
+}
+
+// HTTPError
+type HTTPError struct {
+	Code    int    `json:"code" example:"400"`
+	Message string `json:"message" example:"status bad request"`
+}
