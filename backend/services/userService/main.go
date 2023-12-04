@@ -22,8 +22,13 @@ import (
 //	@license.name	Apache 2.0
 //	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 
-//	@host		vacaition.userService.swagger.io
+//	@host		localhost:5000
 //	@BasePath	/api
+
+//	@securitydefinitions.oauth2.implicit	OAuth2Application
+//	@authorizationurl						http://localhost:5000/api/oauth?provider=google
+//	@scope.write							Grants write access
+//	@scope.admin							Grants read and write access to administrative information
 
 func main() {
 

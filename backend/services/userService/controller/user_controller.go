@@ -6,13 +6,10 @@ import (
 	"backend/services/userService/models"
 	"backend/services/userService/repository"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -26,9 +23,22 @@ func NewUserHandler(repo repository.UserRepo) *UserHandler {
 	}
 }
 
+// GetStringByInt example
+//
+//	@Summary		Add a new pet to the store
+//	@Description	get user info
+//	@ID				get-user-info
+//	@Accept			json
+//	@Produce		json
+//	@Success		200		{object}	models.User
+//	@Failure		400		{object}	jsonHelper.HTTPError	"We need ID!!"
+//	@Failure		404		{object}	jsonHelper.HTTPError	"Can not find ID"
+//	@Router			/auth/user [get]
+//  @Security OAuth2Application[write, admin]
 func (h *UserHandler) GetUserInfo(w http.ResponseWriter, request *http.Request) {
 
-	requestedId := chi.URLParam(request, "user_id")
+	userClaims := request.Context().Value("user-claims").(models.Claims)
+	requestedId := userClaims.UserId
 
 	// Try to retrieve user info based on given id
 	if requestedId != "" {
@@ -112,39 +122,10 @@ func (h *UserHandler) LogoutUser(w http.ResponseWriter, request *http.Request) {
 
 func (h *UserHandler) CheckTokenValid(w http.ResponseWriter, request *http.Request) {
 
-	// Obtain token from cookies
-	c, err := request.Cookie("token")
-
-	if err != nil {
-		if err == http.ErrNoCookie {
-			jsonHelper.HttpErrorResponse(w, http.StatusUnauthorized, err)
-			return
-		}
-		jsonHelper.HttpErrorResponse(w, http.StatusBadRequest, err)
-		return
-	}
-
-	// Validate token
-	jwtString := c.Value
-	claims := &models.Claims{}
-	token, err := jwtHelper.CheckTokenValid(jwtString, claims)
-
-	if err != nil {
-		if err == jwt.ErrSignatureInvalid {
-			jsonHelper.HttpErrorResponse(w, http.StatusUnauthorized, err)
-			return
-		}
-		jsonHelper.HttpErrorResponse(w, http.StatusBadRequest, err)
-		return
-	}
-
-	if !token.Valid {
-		jsonHelper.HttpErrorResponse(w, http.StatusUnauthorized, errors.New("Invalid token."))
-		return
-	}
+	userClaims := request.Context().Value("user-claims").(models.Claims)
 
 	// Renew token
-	renewalError := jwtHelper.CreateJwtToken(w, claims.UserId, claims.Email)
+	renewalError := jwtHelper.CreateJwtToken(w, userClaims.UserId, userClaims.Email)
 
 	if renewalError != nil {
 		jsonHelper.HttpErrorResponse(w, http.StatusInternalServerError, renewalError)

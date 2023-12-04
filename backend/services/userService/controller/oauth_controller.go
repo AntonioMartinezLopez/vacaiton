@@ -2,6 +2,7 @@ package controller
 
 import (
 	"backend/pkg/jsonHelper"
+	"backend/pkg/logger"
 	"backend/services/userService/jwtHelper"
 	"backend/services/userService/models"
 	"backend/services/userService/repository"
@@ -38,6 +39,8 @@ func (h *OauthHandler) OauthCallback(w http.ResponseWriter, request *http.Reques
 		return
 	}
 
+	logger.Info(string(jsonHelper.ServeJson(user)))
+
 	// Generate JWT token
 	jwtError := jwtHelper.CreateJwtToken(w, user.UserID, user.Email)
 
@@ -68,6 +71,16 @@ func (h *OauthHandler) OauthInit(w http.ResponseWriter, request *http.Request) {
 			return
 		}
 		jsonHelper.HttpResponse(&models.AuthResponse{Status: models.LoggedIn}, w)
+
+	} else {
+		gothic.BeginAuthHandler(w, request)
+	}
+}
+
+func (h *OauthHandler) ReceiveAccessToken(w http.ResponseWriter, request *http.Request) {
+	if user, err := gothic.CompleteUserAuth(w, request); err == nil {
+
+		jsonHelper.HttpResponse(user.AccessToken, w)
 
 	} else {
 		gothic.BeginAuthHandler(w, request)

@@ -1,0 +1,60 @@
+basePath: /api
+definitions:
+  jsonHelper.HTTPError:
+    properties:
+      code:
+        example: 400
+        type: integer
+      message:
+        example: status bad request
+        type: string
+    type: object
+host: localhost:5000
+info:
+  contact:
+    email: support@swagger.io
+    name: Vacaition API Support
+    url: http://www.swagger.io/support
+  description: This server is used for creating new users and conduct authentication
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: User/Auth API
+  version: "1.0"
+paths:
+  /auth/user:
+    get:
+      consumes:
+      - application/json
+      description: get user info
+      operationId: get-user-info
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: We need ID!!
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+        "404":
+          description: Can not find ID
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+      security:
+      - OAuth2Application:
+        - write
+        - admin
+      summary: Add a new pet to the store
+securityDefinitions:
+  OAuth2Application:
+    authorizationUrl: http://localhost:5000/api/oauth?provider=google
+    flow: implicit
+    scopes:
+      admin: "\t\t\t\t\t\t\tGrants read and write access to administrative information"
+      write: "\t\t\t\t\t\t\tGrants write access"
+    type: oauth2
+swagger: "2.0"

@@ -15,7 +15,7 @@ This function generates a JWT token and sets the generated token as cookie to th
 func CreateJwtToken(w http.ResponseWriter, userId string, email string) error {
 
 	// Create JWT Token and Sign it
-	expirationTime := time.Now().Add(time.Minute * 20)
+	expirationTime := time.Now().Add(time.Second * 10)
 
 	claims := &models.Claims{
 		UserId: userId,
