@@ -8,7 +8,7 @@ import (
 
 func Cors() func(http.Handler) http.Handler {
 	return cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"0.0.0.0", "localhost"},
+		AllowedOrigins:   []string{"0.0.0.0", "localhost", "*", "localhost:8080"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token", "Access-Control-Allow-Origin", "Access-Control-Allow-Method", "Access-Control-Allow-Headers"},
 		ExposedHeaders:   []string{"Link"},

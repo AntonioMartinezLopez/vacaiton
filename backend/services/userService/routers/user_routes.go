@@ -15,7 +15,7 @@ func UserRoutes(router chi.Router, db *database.DB) {
 
 	router.Route("/auth", func(r chi.Router) {
 		r.Post("/signup", userController.CreateUser)
-		r.Get("/login", userController.LoginUser)
+		r.Post("/login", userController.LoginUser)
 
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.JwtGuard)

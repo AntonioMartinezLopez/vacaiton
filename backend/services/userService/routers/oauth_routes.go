@@ -16,6 +16,5 @@ func OauthRoutes(router chi.Router, db *database.DB) {
 		r.Get("/callback", oauthController.OauthCallback)
 		r.Get("/logout", oauthController.OauthLogout)
 		r.Get("/", oauthController.OauthInit)
-		r.Get("/token", oauthController.ReceiveAccessToken)
 	})
 }

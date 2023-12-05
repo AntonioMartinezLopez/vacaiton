@@ -17,7 +17,7 @@ func RegisterRoutes(router *chi.Mux, db *database.DB) {
 	})
 
 	router.Get("/api/swagger/*", httpSwagger.Handler(
-		httpSwagger.URL(fmt.Sprintf("http://localhost:%s/api/swagger/doc.json", viper.GetString("PORT")))), //The url pointing to API definition
+		httpSwagger.URL(fmt.Sprintf("http://%s/api/swagger/doc.json", viper.GetString("URL")))), //The url pointing to API definition
 	)
 
 	router.Route("/api", func(r chi.Router) {

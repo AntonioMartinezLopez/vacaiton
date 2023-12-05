@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/auth/user": {
+        "/auth": {
             "get": {
                 "security": [
                     {
@@ -34,20 +34,214 @@ const docTemplate = `{
                         ]
                     }
                 ],
-                "description": "get user info",
+                "description": "This Endpoint is used to check token in cookie header and renews it",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Add a new pet to the store",
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Check Token validity",
+                "operationId": "check-token",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.AuthResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid input: Invalid password",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Invalid input: User not found",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Invalid input: User Already exists",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "description": "This Endpoint is used to sign in a specific user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Sign in of an user",
+                "operationId": "login-user",
+                "parameters": [
+                    {
+                        "description": "User Input for login",
+                        "name": "loginUserInput",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SignInUserInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.AuthResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid input: Invalid password",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Invalid input: User not found",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Invalid input: User Already exists",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "get": {
+                "security": [
+                    {
+                        "OAuth2Application": [
+                            "write",
+                            "admin"
+                        ]
+                    }
+                ],
+                "description": "This Endpoint is used to logout a specific user and delete the corresponding session cookie",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Log out of an user",
+                "operationId": "logut-user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.AuthResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/signup": {
+            "post": {
+                "description": "Register and create a new user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Create a new user",
+                "operationId": "create-user",
+                "parameters": [
+                    {
+                        "description": "User Input for creating a new user",
+                        "name": "newUserInput",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.RegisterUserInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.RegisterUserOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Invalid input: User Already exists",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/user": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get user info (for registered users)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Get user related data",
                 "operationId": "get-user-info",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.User"
                         }
                     },
                     "400": {
@@ -64,6 +258,32 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/oauth": {
+            "get": {
+                "description": "This Endpoint is used to login user via google oauth provider - this endpoint triggers the process and redirects to the google authentication service",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "OAuth"
+                ],
+                "summary": "Initiates login process using google oauth",
+                "operationId": "login-oauth",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "google",
+                        "description": "oauth provider",
+                        "name": "provider",
+                        "in": "query"
+                    }
+                ],
+                "responses": {}
+            }
         }
     },
     "definitions": {
@@ -79,13 +299,125 @@ const docTemplate = `{
                     "example": "status bad request"
                 }
             }
+        },
+        "models.AuthResponse": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "$ref": "#/definitions/models.LoginStatus"
+                }
+            }
+        },
+        "models.LoginStatus": {
+            "type": "integer",
+            "enum": [
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "LoggedIn",
+                "LoggedOut"
+            ]
+        },
+        "models.RegisterUserInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "firstname",
+                "lastname",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "testuser@test.de"
+                },
+                "firstname": {
+                    "type": "string",
+                    "example": "testuser"
+                },
+                "lastname": {
+                    "type": "string",
+                    "example": "testuser"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "test"
+                }
+            }
+        },
+        "models.RegisterUserOutput": {
+            "type": "object",
+            "required": [
+                "userId"
+            ],
+            "properties": {
+                "userId": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "models.SignInUserInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "testuser@test.de"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "test"
+                }
+            }
+        },
+        "models.User": {
+            "type": "object",
+            "required": [
+                "email",
+                "firstname",
+                "lastname"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2023-12-01T12:37:59.008583Z"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "testuser"
+                },
+                "firstname": {
+                    "type": "string",
+                    "example": "testuser"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "lastname": {
+                    "type": "string",
+                    "example": "testuser"
+                },
+                "updated_at_at": {
+                    "type": "string",
+                    "example": "2023-12-01T12:37:59.008583Z"
+                }
+            }
         }
     },
     "securityDefinitions": {
         "OAuth2Application": {
             "type": "oauth2",
             "flow": "implicit",
-            "authorizationUrl": "http://localhost:5000/api/oauth?provider=google",
+            "authorizationUrl": "http://localhost:8080/userservice/api/oauth?provider=google",
             "scopes": {
                 "admin": "\t\t\t\t\t\t\tGrants read and write access to administrative information",
                 "write": "\t\t\t\t\t\t\tGrants write access"
@@ -97,11 +429,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:5000",
-	BasePath:         "/api",
+	Host:             "localhost:8080",
+	BasePath:         "/userservice/api",
 	Schemes:          []string{},
 	Title:            "User/Auth API",
-	Description:      "This server is used for creating new users and conduct authentication",
+	Description:      "Swagger authentication is set to oauth to make login easier",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

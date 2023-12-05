@@ -6,8 +6,10 @@ import (
 	"backend/services/userService/jwtHelper"
 	"backend/services/userService/models"
 	"backend/services/userService/repository"
+	"fmt"
 	"net/http"
 
+	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/google"
@@ -23,8 +25,10 @@ func NewOauthHandler(repo repository.UserRepo) *OauthHandler {
 	id := viper.GetString("OAUTH_GOOGLE_ID")
 	key := viper.GetString("OAUTH_GOOGLE_KEY")
 
+	gothic.Store = sessions.NewCookieStore([]byte(viper.GetString("SECRET")))
+
 	goth.UseProviders(
-		google.New(id, key, "http://localhost:5000/api/oauth/callback?provider=google"),
+		google.New(id, key, fmt.Sprintf("http://%s/api/oauth/callback?provider=google", viper.GetString("URL"))),
 	)
 
 	return &OauthHandler{
@@ -54,12 +58,27 @@ func (h *OauthHandler) OauthCallback(w http.ResponseWriter, request *http.Reques
 	jsonHelper.HttpResponse(&models.AuthResponse{Status: models.LoggedIn}, w)
 }
 
+//	@Summary		Logout process using google oauth
+//	@Tags			OAuth
+//	@Description	This Endpoint is used to login user via google oauth provider - this endpoint triggers the process and redirects to the google authentication service
+//	@ID				logoaut-oauth
+//	@Accept			json
+//	@Produce		html
+//	@Router			/oauth [get]
 func (h *OauthHandler) OauthLogout(w http.ResponseWriter, request *http.Request) {
 	gothic.Logout(w, request)
 	w.Header().Set("Location", "/")
 	w.WriteHeader(http.StatusTemporaryRedirect)
 }
 
+//	@Summary		Initiates login process using google oauth
+//	@Tags			OAuth
+//	@Description	This Endpoint is used to login user via google oauth provider - this endpoint triggers the process and redirects to the google authentication service
+//	@ID				login-oauth
+//	@Param			provider	query	string	false	"oauth provider"	default(google)
+//	@Accept			json
+//	@Produce		json
+//	@Router			/oauth [get]
 func (h *OauthHandler) OauthInit(w http.ResponseWriter, request *http.Request) {
 	if user, err := gothic.CompleteUserAuth(w, request); err == nil {
 
@@ -71,16 +90,6 @@ func (h *OauthHandler) OauthInit(w http.ResponseWriter, request *http.Request) {
 			return
 		}
 		jsonHelper.HttpResponse(&models.AuthResponse{Status: models.LoggedIn}, w)
-
-	} else {
-		gothic.BeginAuthHandler(w, request)
-	}
-}
-
-func (h *OauthHandler) ReceiveAccessToken(w http.ResponseWriter, request *http.Request) {
-	if user, err := gothic.CompleteUserAuth(w, request); err == nil {
-
-		jsonHelper.HttpResponse(user.AccessToken, w)
 
 	} else {
 		gothic.BeginAuthHandler(w, request)

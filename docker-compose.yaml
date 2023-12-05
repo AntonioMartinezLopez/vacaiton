@@ -37,12 +37,12 @@ services:
     build:
       context: ./backend/services/userService
       dockerfile: Dockerfile.dev
-    ports:
-      - 5000:5000
+    # ports:
+    #   - 5000:5000
     volumes:
       - ./backend:/app
     environment:
-      USERSERVICE_PORT: 5000
+      USERSERVICE_PORT: 80
       USERSERVICE_SECRET: gf37d2c!_edezb2
       USERSERVICE_DB_HOST: db
       USERSERVICE_DB_NAME: user

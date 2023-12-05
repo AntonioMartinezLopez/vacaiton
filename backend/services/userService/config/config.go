@@ -30,9 +30,10 @@ func SetupConfig() (Configuration, error) {
 	viper.SetEnvPrefix("USERSERVICE")
 
 	// Set Default
-	viper.SetDefault("PORT", 5000)
+	viper.SetDefault("PORT", "80")
 	viper.SetDefault("LOG_LEVEL", "DEBUG")
 	viper.SetDefault("HOST", "0.0.0.0")
+	viper.SetDefault("URL", "localhost:8080/userservice")
 	viper.SetDefault("DB_PORT", 5432)
 	viper.SetDefault("DB_LOGMODE", true)
 	viper.SetDefault("DB_SSLMODE", "disable")
