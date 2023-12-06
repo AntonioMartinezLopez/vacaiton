@@ -2,7 +2,6 @@ package controller
 
 import (
 	"backend/pkg/jsonHelper"
-	"backend/pkg/logger"
 	"backend/services/userService/jwtHelper"
 	"backend/services/userService/models"
 	"backend/services/userService/repository"
@@ -40,7 +39,6 @@ func (h *UserHandler) GetUserInfo(w http.ResponseWriter, request *http.Request) 
 	userClaims := request.Context().Value("user-claims").(models.Claims)
 	requestedId := userClaims.UserId
 
-	logger.Info("REQUESTED ID: " + requestedId)
 	// Try to retrieve user info based on given id
 	if requestedId != "" {
 		user, error := h.repo.GetUserById(requestedId)
@@ -67,7 +65,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, request *http.Request) {
 
 	// Validate Input
 	userInput := new(models.RegisterUserInput)
-	err := json.NewDecoder(request.Body).Decode(&userInput)
+	err := json.NewDecoder(request.Body).Decode(userInput)
 	if err != nil {
 		jsonHelper.HttpErrorResponse(w, http.StatusBadRequest, err)
 		return
@@ -101,7 +99,7 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, request *http.Request) {
 
 	// Validate user input
 	userInput := new(models.SignInUserInput)
-	err := json.NewDecoder(request.Body).Decode(&userInput)
+	err := json.NewDecoder(request.Body).Decode(userInput)
 	if err != nil {
 		jsonHelper.HttpErrorResponse(w, http.StatusBadRequest, err)
 		return
