@@ -89,7 +89,6 @@ definitions:
     - firstname
     - lastname
     type: object
-host: localhost:8080
 info:
   contact:
     email: support@swagger.io
@@ -107,8 +106,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: This Endpoint is used to check token in cookie header and renews
-        it
+      description: This Endpoint is used to check token in cookie header. The JWT
+        token is additionally being refreshed.
       operationId: check-token
       produces:
       - application/json
@@ -275,6 +274,20 @@ paths:
       - application/json
       responses: {}
       summary: Initiates login process using google oauth
+      tags:
+      - OAuth
+  /oauth/logout:
+    get:
+      consumes:
+      - application/json
+      description: This Endpoint is used to login user via google oauth provider -
+        this endpoint triggers the process and redirects to the google authentication
+        service
+      operationId: logoaut-oauth
+      produces:
+      - text/html
+      responses: {}
+      summary: Logout process using google oauth
       tags:
       - OAuth
 securityDefinitions:

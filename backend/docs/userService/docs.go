@@ -34,7 +34,7 @@ const docTemplate = `{
                         ]
                     }
                 ],
-                "description": "This Endpoint is used to check token in cookie header and renews it",
+                "description": "This Endpoint is used to check token in cookie header. The JWT token is additionally being refreshed.",
                 "consumes": [
                     "application/json"
                 ],
@@ -284,6 +284,23 @@ const docTemplate = `{
                 ],
                 "responses": {}
             }
+        },
+        "/oauth/logout": {
+            "get": {
+                "description": "This Endpoint is used to login user via google oauth provider - this endpoint triggers the process and redirects to the google authentication service",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "OAuth"
+                ],
+                "summary": "Logout process using google oauth",
+                "operationId": "logoaut-oauth",
+                "responses": {}
+            }
         }
     },
     "definitions": {
@@ -429,7 +446,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "",
 	BasePath:         "/userservice/api",
 	Schemes:          []string{},
 	Title:            "User/Auth API",

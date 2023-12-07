@@ -32,7 +32,7 @@ import (
 
 //	@Tags	Auth, OAuth
 
-// 	@BasePath	/api
+// 	@BasePath	/userservice/api
 
 //	@securitydefinitions.oauth2.implicit	OAuth2Application
 //	@authorizationurl						http://localhost:8080/userservice/api/oauth?provider=google

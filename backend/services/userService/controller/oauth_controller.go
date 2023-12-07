@@ -64,7 +64,7 @@ func (h *OauthHandler) OauthCallback(w http.ResponseWriter, request *http.Reques
 //	@ID				logoaut-oauth
 //	@Accept			json
 //	@Produce		html
-//	@Router			/oauth [get]
+//	@Router			/oauth/logout [get]
 func (h *OauthHandler) OauthLogout(w http.ResponseWriter, request *http.Request) {
 	gothic.Logout(w, request)
 	w.Header().Set("Location", "/")

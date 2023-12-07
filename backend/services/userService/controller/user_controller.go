@@ -154,7 +154,7 @@ func (h *UserHandler) LogoutUser(w http.ResponseWriter, request *http.Request) {
 
 //	@Summary		Check Token validity
 //	@Tags			Auth
-//	@Description	This Endpoint is used to check token in cookie header and renews it
+//	@Description	This Endpoint is used to check token in cookie header. The JWT token is additionally being refreshed.
 //	@ID				check-token
 //	@Accept			json
 //	@Produce		json

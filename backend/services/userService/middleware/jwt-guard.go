@@ -7,8 +7,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-
-	"github.com/golang-jwt/jwt"
 )
 
 func JwtGuard(next http.Handler) http.Handler {
@@ -28,16 +26,7 @@ func JwtGuard(next http.Handler) http.Handler {
 		// Validate token
 		jwtString := c.Value
 		claims := &models.Claims{}
-		token, err := jwtHelper.CheckTokenValid(jwtString, claims)
-
-		if err != nil {
-			if err == jwt.ErrSignatureInvalid {
-				jsonHelper.HttpErrorResponse(w, http.StatusUnauthorized, err)
-				return
-			}
-			jsonHelper.HttpErrorResponse(w, http.StatusBadRequest, err)
-			return
-		}
+		token, _ := jwtHelper.CheckTokenValid(jwtString, claims)
 
 		if !token.Valid {
 			jsonHelper.HttpErrorResponse(w, http.StatusUnauthorized, errors.New("Invalid token."))
