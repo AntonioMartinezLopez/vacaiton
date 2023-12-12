@@ -51,6 +51,23 @@ services:
       USERSERVICE_OAUTH_GOOGLE_ID: ${OAUTH_GOOGLE_ID}
       USERSERVICE_OAUTH_GOOGLE_KEY: ${OAUTH_GOOGLE_KEY}
     restart: always
+  tripservice:
+    container_name: tripService
+    build:
+      context: ./backend/services/tripService
+      dockerfile: Dockerfile.dev
+    # ports:
+    #   - 5000:5000
+    volumes:
+      - ./backend:/app
+    environment:
+      USERSERVICE_PORT: 80
+      USERSERVICE_SECRET: gf37d2c!_edezb2
+      USERSERVICE_DB_HOST: db
+      USERSERVICE_DB_NAME: trip
+      USERSERVICE_DB_USER: tripservice
+      USERSERVICE_DB_PASSWORD: tripservice
+    restart: always
   db:
     image: postgres
     restart: always
