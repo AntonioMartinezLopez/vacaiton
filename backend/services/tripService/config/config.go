@@ -53,7 +53,7 @@ func SetupConfig() (Configuration, error) {
 	}
 
 	// unmarshall values to the config object and return the value
-	err := viper.Unmarshal(&configuration)
+	err := viper.Unmarshal(configuration)
 	if err != nil {
 		logger.Error("error to decode, %v", err)
 		return *configuration, err

@@ -4,13 +4,38 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+
+	"github.com/go-playground/validator/v10"
 )
+
+var validate *validator.Validate
+
+func init() {
+	validate = validator.New(validator.WithRequiredStructEnabled())
+}
 
 func DecodeJSON(r io.Reader, obj interface{}) error {
 	decoder := json.NewDecoder(r)
 	// decoder.DisallowUnknownFields()
 	if err := decoder.Decode(obj); err != nil {
 		return err
+	}
+	return nil
+}
+
+func DecodeJSONAndValidate(r io.Reader, obj any) error {
+
+	// Decode
+	decoder := json.NewDecoder(r)
+	// decoder.DisallowUnknownFields()
+	if err := decoder.Decode(obj); err != nil {
+		return err
+	}
+
+	// Validate
+	validationError := validate.Struct(obj)
+	if validationError != nil {
+		return validationError
 	}
 	return nil
 }

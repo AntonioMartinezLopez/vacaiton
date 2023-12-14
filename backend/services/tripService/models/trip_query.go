@@ -13,3 +13,20 @@ type TripQuery struct {
 	Focus           TripFocus  `json:"focus" sql:"type:enum('cities','nature','mixed');default:'mixed'" gorm:"embedded"`
 	TripID          uint       `json:"trip_id" `
 }
+
+type CreateTripQueryInput struct {
+	Country         string    `json:"country" binding:"required" example:"Germany" validate:"required"`
+	Duration        int       `json:"duration" binding:"required" example:"10" validate:"required"`
+	Secrets         bool      `json:"secrets" binding:"required" validate:"required"`
+	MaximumDistance int       `json:"maximum_distance" binding:"required" example:"1000" validate:"required"`
+	Focus           TripFocus `json:"focus" binding:"required"`
+}
+
+type UpdateTripQueryInput struct {
+	Id              uint      `json:"id" example:"1"`
+	Country         string    `json:"country" example:"Germany"`
+	Duration        int       `json:"duration" example:"10"`
+	Secrets         bool      `json:"secrets"`
+	MaximumDistance int       `json:"maximum_distance" example:"1000"`
+	Focus           TripFocus `json:"focus"`
+}
