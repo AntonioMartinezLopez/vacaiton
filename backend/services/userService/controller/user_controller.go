@@ -2,10 +2,10 @@ package controller
 
 import (
 	"backend/pkg/jsonHelper"
+	"backend/pkg/middlewares"
 	"backend/services/userService/jwtHelper"
 	"backend/services/userService/models"
 	"backend/services/userService/repository"
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -36,7 +36,7 @@ func NewUserHandler(repo repository.UserRepo) *UserHandler {
 //	@Security		ApiKeyAuth
 func (h *UserHandler) GetUserInfo(w http.ResponseWriter, request *http.Request) {
 
-	userClaims := request.Context().Value("user-claims").(models.Claims)
+	userClaims := request.Context().Value("user-claims").(middlewares.Claims)
 	requestedId := userClaims.UserId
 
 	// Try to retrieve user info based on given id
@@ -65,7 +65,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, request *http.Request) {
 
 	// Validate Input
 	userInput := new(models.RegisterUserInput)
-	err := json.NewDecoder(request.Body).Decode(userInput)
+	err := jsonHelper.DecodeJSONAndValidate(request.Body, userInput)
 	if err != nil {
 		jsonHelper.HttpErrorResponse(w, http.StatusBadRequest, err)
 		return
@@ -99,7 +99,7 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, request *http.Request) {
 
 	// Validate user input
 	userInput := new(models.SignInUserInput)
-	err := json.NewDecoder(request.Body).Decode(userInput)
+	err := jsonHelper.DecodeJSONAndValidate(request.Body, userInput)
 	if err != nil {
 		jsonHelper.HttpErrorResponse(w, http.StatusBadRequest, err)
 		return
@@ -167,7 +167,7 @@ func (h *UserHandler) LogoutUser(w http.ResponseWriter, request *http.Request) {
 //	@Security		OAuth2Application[write, admin]
 func (h *UserHandler) CheckTokenValid(w http.ResponseWriter, request *http.Request) {
 
-	userClaims := request.Context().Value("user-claims").(models.Claims)
+	userClaims := request.Context().Value("user-claims").(middlewares.Claims)
 
 	// Renew token
 	renewalError := jwtHelper.CreateJwtToken(w, userClaims.UserId, userClaims.Email)
@@ -175,6 +175,8 @@ func (h *UserHandler) CheckTokenValid(w http.ResponseWriter, request *http.Reque
 	if renewalError != nil {
 		jsonHelper.HttpErrorResponse(w, http.StatusInternalServerError, renewalError)
 	}
+
+	w.Header().Add("X-Auth-User-Claims", string(jsonHelper.ServeJson(userClaims)))
 
 	jsonHelper.HttpResponse(&models.AuthResponse{Status: models.LoggedIn}, w)
 }

@@ -3,15 +3,7 @@ package models
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/golang-jwt/jwt/v5"
 )
-
-type Claims struct {
-	UserId string `json:"id"`
-	Email  string `json:"email"`
-	jwt.RegisteredClaims
-}
 
 type LoginStatus int
 

@@ -15,15 +15,15 @@ type User struct {
 }
 
 type RegisterUserInput struct {
-	Firstname string `json:"firstname" binding:"required" example:"testuser"`
-	Lastname  string `json:"lastname" binding:"required" example:"testuser"`
-	Email     string `json:"email" binding:"required" example:"testuser@test.de"`
-	Password  string `json:"password" binding:"required" example:"test"`
+	Firstname string `json:"firstname" binding:"required" validate:"required" example:"testuser"`
+	Lastname  string `json:"lastname" binding:"required" validate:"required" example:"testuser"`
+	Email     string `json:"email" binding:"required" validate:"required" example:"testuser@test.de"`
+	Password  string `json:"password" binding:"required" validate:"required" example:"test"`
 }
 
 type SignInUserInput struct {
-	Email    string `json:"email" binding:"required" example:"testuser@test.de"`
-	Password string `json:"password" binding:"required" example:"test"`
+	Email    string `json:"email" binding:"required" validate:"required" example:"testuser@test.de"`
+	Password string `json:"password" binding:"required" validate:"required" example:"test"`
 }
 
 type RegisterUserOutput struct {

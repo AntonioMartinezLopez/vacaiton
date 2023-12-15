@@ -2,8 +2,10 @@ package controller
 
 import (
 	"backend/pkg/jsonHelper"
+	"backend/pkg/middlewares"
 	"backend/services/tripService/models"
 	"backend/services/tripService/repository"
+	"errors"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -31,8 +33,15 @@ func (h *TripHandler) CreateTrip(w http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	// user data
+	userClaims, assertionCorrest := request.Context().Value("user-claims").(middlewares.Claims)
+	if !assertionCorrest {
+		jsonHelper.HttpErrorResponse(w, http.StatusInternalServerError, errors.New("Error in user claim type assertion"))
+		return
+	}
+
 	// Create Trip
-	trip, err := h.repo.CreateTrip(createTripInfo)
+	trip, err := h.repo.CreateTrip(createTripInfo, userClaims.UserId)
 	if err != nil {
 		jsonHelper.HttpErrorResponse(w, http.StatusInternalServerError, err)
 		return

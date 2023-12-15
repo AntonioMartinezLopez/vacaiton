@@ -27,7 +27,7 @@ func DecodeJSONAndValidate(r io.Reader, obj any) error {
 
 	// Decode
 	decoder := json.NewDecoder(r)
-	// decoder.DisallowUnknownFields()
+	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(obj); err != nil {
 		return err
 	}

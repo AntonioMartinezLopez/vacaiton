@@ -2,6 +2,7 @@ package controller_test
 
 import (
 	"backend/pkg/jsonHelper"
+	"backend/pkg/middlewares"
 	"backend/services/userService/controller"
 	"backend/services/userService/models"
 	"context"
@@ -69,7 +70,7 @@ func TestGetUserInfoHandler(t *testing.T) {
 		// create request and reponse objects from a artificial context
 		// request with extended context as it is a protected route where previously authentication was processed
 		req := httptest.NewRequest(http.MethodGet, "/api/auth/user", nil)
-		ctx := context.WithValue(req.Context(), "user-claims", models.Claims{UserId: "1"})
+		ctx := context.WithValue(req.Context(), "user-claims", middlewares.Claims{UserId: "1"})
 
 		// response object mocked by recorder
 		w := httptest.NewRecorder()
@@ -99,7 +100,7 @@ func TestGetUserInfoHandler(t *testing.T) {
 		// create request and reponse objects from a artificial context
 		// request with extended context as it is a protected route where previously authentication was processed
 		req := httptest.NewRequest(http.MethodGet, "/api/auth/user", nil)
-		ctx := context.WithValue(req.Context(), "user-claims", models.Claims{UserId: "9"})
+		ctx := context.WithValue(req.Context(), "user-claims", middlewares.Claims{UserId: "9"})
 
 		// response object mocked by recorder
 		w := httptest.NewRecorder()
@@ -126,7 +127,12 @@ func TestCreateUserHandler(t *testing.T) {
 
 	// Test normal procedure
 	t.Run("Should create user with correct input", func(t *testing.T) {
-		userInput := models.RegisterUserInput{}
+		userInput := models.RegisterUserInput{
+			Firstname: "test",
+			Lastname:  "test",
+			Email:     "Test2@test.de",
+			Password:  "test",
+		}
 		req := httptest.NewRequest(http.MethodPost, "/api/auth/signup", strings.NewReader(string(jsonHelper.ServeJson(userInput))))
 
 		// response object mocked by recorder
@@ -177,7 +183,12 @@ func TestCreateUserHandler(t *testing.T) {
 
 	// Test procedure when email already exists
 	t.Run("Should return 500 when email is already given", func(t *testing.T) {
-		userInput := models.RegisterUserInput{Email: "Test@test.de"}
+		userInput := models.RegisterUserInput{
+			Firstname: "test",
+			Lastname:  "test",
+			Email:     "Test@test.de",
+			Password:  "test",
+		}
 		req := httptest.NewRequest(http.MethodPost, "/api/auth/signup", strings.NewReader(string(jsonHelper.ServeJson(userInput))))
 
 		// response object mocked by recorder
@@ -342,7 +353,7 @@ func TestCheckTokenUserHandler(t *testing.T) {
 	t.Run("Should return 200 when used token is valid and renews it", func(t *testing.T) {
 		// request with extended context as it is a protected route where previously authentication was processed
 		req := httptest.NewRequest(http.MethodGet, "/api/auth", nil)
-		ctx := context.WithValue(req.Context(), "user-claims", models.Claims{UserId: "1", Email: "Test@test.de"})
+		ctx := context.WithValue(req.Context(), "user-claims", middlewares.Claims{UserId: "1", Email: "Test@test.de"})
 
 		// response object mocked by recorder
 		w := httptest.NewRecorder()

@@ -2,9 +2,9 @@ package jwtHelper_test
 
 import (
 	"backend/pkg/jsonHelper"
+	"backend/pkg/middlewares"
 	"backend/services/userService/jwtHelper"
 	"backend/services/userService/middleware"
-	"backend/services/userService/models"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -20,7 +20,7 @@ func TestJwtGuard(t *testing.T) {
 
 		// call middleware with missing jwt in cookies
 		jwtGuard := middleware.JwtGuard(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			userClaims := r.Context().Value("user-claims").(models.Claims)
+			userClaims := r.Context().Value("user-claims").(middlewares.Claims)
 			jwtHelper.CreateJwtToken(w, userClaims.UserId, userClaims.Email)
 		}))
 		jwtGuard.ServeHTTP(w, req)
@@ -87,7 +87,7 @@ func TestJwtGuard(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		jwtGuard := middleware.JwtGuard(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			userClaims := r.Context().Value("user-claims").(models.Claims)
+			userClaims := r.Context().Value("user-claims").(middlewares.Claims)
 			jwtHelper.CreateJwtToken(w, userClaims.UserId, userClaims.Email)
 		}))
 		jwtGuard.ServeHTTP(w, req)

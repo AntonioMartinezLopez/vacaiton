@@ -3,12 +3,12 @@ package repository
 import "backend/services/tripService/models"
 
 type TripRepo interface {
-	CreateTrip(createTripInput *models.CreateTripQueryInput) (res *models.Trip, err error)
+	CreateTrip(createTripInput *models.CreateTripQueryInput, userId string) (res *models.Trip, err error)
 	// GetTrip(id string) (res *models.Trip, err error)
 	// UpdateTrip(updateTripInput *models.UpdateTripQueryInput) (res *models.Trip, err error)
 }
 
-func (r *GormRepository) CreateTrip(createTripInput *models.CreateTripQueryInput) (trip *models.Trip, err error) {
+func (r *GormRepository) CreateTrip(createTripInput *models.CreateTripQueryInput, userId string) (trip *models.Trip, err error) {
 
 	// create new trip
 	newTrip := models.Trip{
@@ -19,7 +19,8 @@ func (r *GormRepository) CreateTrip(createTripInput *models.CreateTripQueryInput
 			MaximumDistance: createTripInput.MaximumDistance,
 			Focus:           createTripInput.Focus,
 		},
-		Stops: []models.TripStop{},
+		Stops:  []models.TripStop{},
+		UserId: userId,
 	}
 
 	result := r.db.Database.Create(&newTrip)

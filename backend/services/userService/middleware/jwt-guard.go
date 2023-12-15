@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"backend/pkg/jsonHelper"
+	"backend/pkg/middlewares"
 	"backend/services/userService/jwtHelper"
-	"backend/services/userService/models"
 	"context"
 	"errors"
 	"net/http"
@@ -25,7 +25,7 @@ func JwtGuard(next http.Handler) http.Handler {
 
 		// Validate token
 		jwtString := c.Value
-		claims := &models.Claims{}
+		claims := &middlewares.Claims{}
 		token, _ := jwtHelper.CheckTokenValid(jwtString, claims)
 
 		if !token.Valid {

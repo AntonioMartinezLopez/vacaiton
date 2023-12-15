@@ -1,7 +1,7 @@
 package jwtHelper
 
 import (
-	"backend/services/userService/models"
+	"backend/pkg/middlewares"
 	"net/http"
 	"time"
 
@@ -17,7 +17,7 @@ func CreateJwtToken(w http.ResponseWriter, userId string, email string) error {
 	// Create JWT Token and Sign it
 	expirationTime := time.Now().Add(time.Minute * 20)
 
-	claims := &models.Claims{
+	claims := &middlewares.Claims{
 		UserId: userId,
 		Email:  email,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -44,7 +44,7 @@ func CreateJwtToken(w http.ResponseWriter, userId string, email string) error {
 	return nil
 }
 
-func CheckTokenValid(jwtString string, claims *models.Claims) (token *jwt.Token, err error) {
+func CheckTokenValid(jwtString string, claims *middlewares.Claims) (token *jwt.Token, err error) {
 	token, err = jwt.ParseWithClaims(jwtString, claims, func(t *jwt.Token) (any, error) {
 		return []byte(viper.GetString("SECRET")), nil
 	})
