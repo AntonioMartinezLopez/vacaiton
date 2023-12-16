@@ -8,6 +8,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -34,8 +35,8 @@ func (h *TripHandler) CreateTrip(w http.ResponseWriter, request *http.Request) {
 	}
 
 	// user data
-	userClaims, assertionCorrest := request.Context().Value("user-claims").(middlewares.Claims)
-	if !assertionCorrest {
+	userClaims, assertionCorrect := request.Context().Value("user-claims").(middlewares.Claims)
+	if !assertionCorrect {
 		jsonHelper.HttpErrorResponse(w, http.StatusInternalServerError, errors.New("Error in user claim type assertion"))
 		return
 	}
@@ -49,4 +50,45 @@ func (h *TripHandler) CreateTrip(w http.ResponseWriter, request *http.Request) {
 
 	// Return result
 	jsonHelper.HttpResponse(&trip, w)
+}
+
+func (h *TripHandler) GetTrip(w http.ResponseWriter, request *http.Request) {
+
+	// Route param
+	tripID := chi.URLParam(request, "id")
+
+	// user data
+	userClaims, assertionCorrect := request.Context().Value("user-claims").(middlewares.Claims)
+	if !assertionCorrect {
+		jsonHelper.HttpErrorResponse(w, http.StatusInternalServerError, errors.New("Error in user claim type assertion"))
+		return
+	}
+
+	trip, err := h.repo.GetTrip(tripID, userClaims.UserId)
+
+	if err != nil {
+		jsonHelper.HttpErrorResponse(w, http.StatusNotFound, err)
+		return
+	}
+
+	jsonHelper.HttpResponse(trip, w)
+}
+
+func (h *TripHandler) GetTrips(w http.ResponseWriter, request *http.Request) {
+
+	// user data
+	userClaims, assertionCorrect := request.Context().Value("user-claims").(middlewares.Claims)
+	if !assertionCorrect {
+		jsonHelper.HttpErrorResponse(w, http.StatusInternalServerError, errors.New("Error in user claim type assertion"))
+		return
+	}
+
+	trips, err := h.repo.GetTrips(userClaims.UserId)
+
+	if err != nil {
+		jsonHelper.HttpErrorResponse(w, http.StatusNotFound, err)
+		return
+	}
+
+	jsonHelper.HttpResponse(trips, w)
 }

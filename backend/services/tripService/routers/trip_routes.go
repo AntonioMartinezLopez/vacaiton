@@ -15,8 +15,14 @@ func TripRoutes(router chi.Router, db *database.DB) {
 	validator := validator.New(validator.WithRequiredStructEnabled())
 	tripController := controller.NewTripHandler(repo, validator)
 
+	router.Use(middlewares.UserClaims)
+
 	router.Route("/trip", func(r chi.Router) {
-		r.Use(middlewares.UserClaims)
 		r.Post("/", tripController.CreateTrip)
+		r.Get("/{id}", tripController.GetTrip)
+	})
+
+	router.Route("/trips", func(r chi.Router) {
+		r.Get("/", tripController.GetTrips)
 	})
 }
