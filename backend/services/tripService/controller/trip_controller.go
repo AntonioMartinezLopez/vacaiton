@@ -5,8 +5,8 @@ import (
 	"backend/pkg/middlewares"
 	"backend/services/tripService/models"
 	"backend/services/tripService/repository"
-	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
@@ -35,11 +35,8 @@ func (h *TripHandler) CreateTrip(w http.ResponseWriter, request *http.Request) {
 	}
 
 	// user data
-	userClaims, assertionCorrect := request.Context().Value("user-claims").(middlewares.Claims)
-	if !assertionCorrect {
-		jsonHelper.HttpErrorResponse(w, http.StatusInternalServerError, errors.New("Error in user claim type assertion"))
-		return
-	}
+	userClaims := middlewares.Claims{}
+	middlewares.ReadUserClaimsFromContext(w, request, &userClaims)
 
 	// Create Trip
 	trip, err := h.repo.CreateTrip(createTripInfo, userClaims.UserId)
@@ -58,11 +55,8 @@ func (h *TripHandler) GetTrip(w http.ResponseWriter, request *http.Request) {
 	tripID := chi.URLParam(request, "id")
 
 	// user data
-	userClaims, assertionCorrect := request.Context().Value("user-claims").(middlewares.Claims)
-	if !assertionCorrect {
-		jsonHelper.HttpErrorResponse(w, http.StatusInternalServerError, errors.New("Error in user claim type assertion"))
-		return
-	}
+	userClaims := middlewares.Claims{}
+	middlewares.ReadUserClaimsFromContext(w, request, &userClaims)
 
 	trip, err := h.repo.GetTrip(tripID, userClaims.UserId)
 
@@ -77,11 +71,8 @@ func (h *TripHandler) GetTrip(w http.ResponseWriter, request *http.Request) {
 func (h *TripHandler) GetTrips(w http.ResponseWriter, request *http.Request) {
 
 	// user data
-	userClaims, assertionCorrect := request.Context().Value("user-claims").(middlewares.Claims)
-	if !assertionCorrect {
-		jsonHelper.HttpErrorResponse(w, http.StatusInternalServerError, errors.New("Error in user claim type assertion"))
-		return
-	}
+	userClaims := middlewares.Claims{}
+	middlewares.ReadUserClaimsFromContext(w, request, &userClaims)
 
 	trips, err := h.repo.GetTrips(userClaims.UserId)
 
@@ -91,4 +82,56 @@ func (h *TripHandler) GetTrips(w http.ResponseWriter, request *http.Request) {
 	}
 
 	jsonHelper.HttpResponse(trips, w)
+}
+
+func (h *TripHandler) UpdateTrip(w http.ResponseWriter, request *http.Request) {
+
+	// Route param
+	tripID := chi.URLParam(request, "id")
+
+	// Validate Input
+	updateTripInput := new(models.UpdateTripQueryInput)
+	err := jsonHelper.DecodeJSONAndValidate(request.Body, updateTripInput)
+	if err != nil {
+		jsonHelper.HttpErrorResponse(w, http.StatusBadRequest, err)
+		return
+	}
+
+	// Overwrite if id is set in param
+	if tripID != "" {
+		id, _ := strconv.Atoi(tripID)
+		updateTripInput.Id = uint(id)
+	}
+
+	// user data
+	userClaims := middlewares.Claims{}
+	middlewares.ReadUserClaimsFromContext(w, request, &userClaims)
+
+	trips, err := h.repo.UpdateTrip(updateTripInput, userClaims.UserId)
+
+	if err != nil {
+		jsonHelper.HttpErrorResponse(w, http.StatusNotFound, err)
+		return
+	}
+
+	jsonHelper.HttpResponse(trips, w)
+}
+
+func (h *TripHandler) DeleteTrip(w http.ResponseWriter, request *http.Request) {
+
+	// Route param
+	tripID := chi.URLParam(request, "id")
+
+	// user data
+	userClaims := middlewares.Claims{}
+	middlewares.ReadUserClaimsFromContext(w, request, &userClaims)
+
+	err := h.repo.DeleteTrip(tripID, userClaims.UserId)
+
+	if err != nil {
+		jsonHelper.HttpErrorResponse(w, http.StatusNotFound, err)
+		return
+	}
+
+	jsonHelper.HttpResponse("", w)
 }

@@ -37,6 +37,16 @@ func UserClaims(next http.Handler) http.Handler {
 	})
 }
 
+func ReadUserClaimsFromContext(w http.ResponseWriter, request *http.Request, claims *Claims) {
+	// user data
+	userClaims, assertionCorrect := request.Context().Value("user-claims").(Claims)
+	if !assertionCorrect {
+		jsonHelper.HttpErrorResponse(w, http.StatusInternalServerError, errors.New("Error in user claim type assertion"))
+		return
+	}
+	*claims = userClaims
+}
+
 type Claims struct {
 	UserId string `json:"id"`
 	Email  string `json:"email"`
