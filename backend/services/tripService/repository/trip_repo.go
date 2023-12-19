@@ -4,6 +4,8 @@ import (
 	"backend/pkg/logger"
 	"backend/services/tripService/models"
 	"errors"
+
+	"gorm.io/gorm"
 )
 
 type TripRepo interface {
@@ -38,7 +40,7 @@ func (r *GormRepository) GetTrip(tripId string, userId string) (*models.Trip, er
 
 	// get trip instance
 	trip := models.Trip{}
-	result := r.db.Database.Preload("Stops").Preload("Query").Where("id = ? AND user_id = ?", tripId, userId).First(&trip)
+	result := r.db.Database.Preload("Stops").Preload("Stops.Highlights").Preload("Query").Where("id = ? AND user_id = ?", tripId, userId).First(&trip)
 
 	if result.RowsAffected != 1 {
 		return &trip, errors.New("Unknown trip id for given user")
@@ -53,7 +55,7 @@ func (r *GormRepository) GetTrips(userId string) ([]models.Trip, error) {
 
 	// get trip instances for one user
 	trip := []models.Trip{}
-	result := r.db.Database.Preload("Stops").Preload("Query").Where("user_id = ?", userId).Find(&trip)
+	result := r.db.Database.Preload("Stops").Preload("Stops.Highlights").Preload("Query").Where("user_id = ?", userId).Find(&trip)
 
 	return trip, result.Error
 }
@@ -62,28 +64,47 @@ func (r *GormRepository) UpdateTrip(updateTripInput *models.UpdateTripQueryInput
 
 	// get trip instance
 	trip := models.Trip{}
-	result := r.db.Database.Preload("Stops").Where("id = ? AND user_id = ?", updateTripInput.Id, userId).First(&trip)
+	var transactionError error
 
-	if result.RowsAffected != 1 {
-		return &trip, errors.New("Unknown trip id for given user")
-	}
+	r.db.Database.Transaction(func(tx *gorm.DB) error {
+		result := r.db.Database.Preload("Stops").Preload("Query").Where("id = ? AND user_id = ?", updateTripInput.Id, userId).First(&trip)
 
-	// reset stops - they are being calculated new
-	r.db.Database.Where("trip_id = ?", trip.Id).Delete(&models.TripStop{})
+		if result.RowsAffected != 1 {
+			transactionError = errors.New("Unknown trip id for given user")
+			return transactionError
+		}
 
-	// overwrite query object and reset all stops
-	trip.Query = models.TripQuery{
-		Country:         updateTripInput.Country,
-		Duration:        updateTripInput.Duration,
-		Secrets:         updateTripInput.Secrets,
-		MaximumDistance: updateTripInput.MaximumDistance,
-		Focus:           updateTripInput.Focus,
-	}
-	trip.Stops = []models.TripStop{}
+		// remove old query
+		if err := r.db.Database.Where("trip_id = ?", trip.Id).Delete(&models.TripQuery{}).Error; err != nil {
+			transactionError = err
+			return err
+		}
 
-	updateResult := r.db.Database.Save(&trip)
+		// reset stops - they are being calculated new
+		if err := r.db.Database.Where("trip_id = ?", trip.Id).Delete(&models.TripStop{}).Error; err != nil {
+			transactionError = err
+			return err
+		}
 
-	return &trip, updateResult.Error
+		// overwrite query object and reset all stops
+		trip.Query = models.TripQuery{
+			Country:         updateTripInput.Country,
+			Duration:        updateTripInput.Duration,
+			Secrets:         updateTripInput.Secrets,
+			MaximumDistance: updateTripInput.MaximumDistance,
+			Focus:           updateTripInput.Focus,
+		}
+		trip.Stops = []models.TripStop{}
+
+		if err := r.db.Database.Save(&trip).Error; err != nil {
+			transactionError = err
+			return err
+		}
+
+		return nil
+	})
+
+	return &trip, transactionError
 }
 
 func (r *GormRepository) DeleteTrip(tripId string, userId string) error {

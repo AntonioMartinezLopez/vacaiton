@@ -2,7 +2,6 @@ package routers
 
 import (
 	"backend/pkg/database"
-	"backend/pkg/middlewares"
 	"backend/services/tripService/controller"
 	"backend/services/tripService/repository"
 
@@ -14,8 +13,6 @@ func TripRoutes(router chi.Router, db *database.DB) {
 	repo := repository.NewGormRepository(db)
 	validator := validator.New(validator.WithRequiredStructEnabled())
 	tripController := controller.NewTripHandler(repo, validator)
-
-	router.Use(middlewares.UserClaims)
 
 	router.Route("/trip", func(r chi.Router) {
 		r.Post("/", tripController.CreateTrip)

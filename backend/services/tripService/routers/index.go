@@ -23,5 +23,6 @@ func RegisterRoutes(router *chi.Mux, db *database.DB) {
 	router.Route("/api", func(r chi.Router) {
 		// Add routes
 		TripRoutes(r, db)
+		StopRoutes(r, db)
 	})
 }

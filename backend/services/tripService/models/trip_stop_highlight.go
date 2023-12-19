@@ -9,5 +9,11 @@ type StopHighlight struct {
 	Name        string     `json:"name"`
 	Description string     `json:"description"`
 	Coordinates string     `json:"coordinates"`
-	TripStopID  uint
+	TripStopID  uint       `json:"stop_id"`
+}
+
+type StopHighlightInput struct {
+	Name        string `json:"name" validate:"required"`
+	Description string `json:"description" validate:"required"`
+	Coordinates string `json:"coordinates" validate:"required"`
 }
