@@ -14,7 +14,6 @@ func SetupRouter(db *database.DB) *chi.Mux {
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
 	router.Use(middlewares.Cors())
-	router.Use(middlewares.UserClaims)
 
 	RegisterRoutes(router, db)
 	return router

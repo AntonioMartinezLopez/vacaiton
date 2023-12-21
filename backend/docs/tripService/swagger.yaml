@@ -3,98 +3,182 @@ definitions:
   jsonHelper.HTTPError:
     properties:
       code:
-        example: 400
         type: integer
       message:
-        example: status bad request
         type: string
     type: object
-  models.AuthResponse:
+  models.CreateTripQueryInput:
     properties:
-      status:
-        $ref: '#/definitions/models.LoginStatus'
-    required:
-    - status
-    type: object
-  models.LoginStatus:
-    enum:
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - LoggedIn
-    - LoggedOut
-  models.RegisterUserInput:
-    properties:
-      email:
-        example: testuser@test.de
+      country:
+        example: Germany
         type: string
-      firstname:
-        example: testuser
-        type: string
-      lastname:
-        example: testuser
-        type: string
-      password:
-        example: test
-        type: string
-    required:
-    - email
-    - firstname
-    - lastname
-    - password
-    type: object
-  models.RegisterUserOutput:
-    properties:
-      userId:
-        example: 1
+      duration:
+        example: 10
         type: integer
-    required:
-    - userId
-    type: object
-  models.SignInUserInput:
-    properties:
-      email:
-        example: testuser@test.de
+      focus:
+        enum:
+        - Cities
+        - Nature
+        - Mixed
+        example: Mixed
         type: string
-      password:
-        example: test
-        type: string
+      maximum_distance:
+        example: 100
+        type: integer
+      secrets:
+        example: true
+        type: boolean
     required:
-    - email
-    - password
+    - country
+    - duration
+    - focus
+    - maximum_distance
+    - secrets
     type: object
-  models.User:
+  models.StopHighlight:
     properties:
       created_at:
         example: "2023-12-01T12:37:59.008583Z"
         type: string
-      email:
-        example: testuser
-        type: string
-      firstname:
-        example: testuser
+      description:
+        example: The landmark of Berlin
         type: string
       id:
         example: 1
         type: integer
-      lastname:
-        example: testuser
+      latitude:
+        example: 13.404954
+        type: number
+      longitude:
+        example: 52.520008
+        type: number
+      name:
+        example: Brandenburger Tor
         type: string
+      stop_id:
+        type: integer
       updated_at_at:
         example: "2023-12-01T12:37:59.008583Z"
         type: string
+    type: object
+  models.Trip:
+    properties:
+      created_at:
+        example: "2023-12-01T12:37:59.008583Z"
+        type: string
+      id:
+        example: 1
+        type: integer
+      query:
+        $ref: '#/definitions/models.TripQuery'
+      stops:
+        items:
+          $ref: '#/definitions/models.TripStop'
+        type: array
+      updated_at_at:
+        example: "2023-12-01T12:37:59.008583Z"
+        type: string
+      user_id:
+        example: "1"
+        type: string
+    type: object
+  models.TripQuery:
+    properties:
+      country:
+        example: Germany
+        type: string
+      created_at:
+        example: "2023-12-01T12:37:59.008583Z"
+        type: string
+      duration:
+        example: 10
+        type: integer
+      focus:
+        enum:
+        - Cities
+        - Nature
+        - Mixed
+        example: Mixed
+        type: string
+      id:
+        example: 1
+        type: integer
+      maximum_distance:
+        example: 1000
+        type: integer
+      secrets:
+        type: boolean
+      updated_at_at:
+        example: "2023-12-01T12:37:59.008583Z"
+        type: string
+    type: object
+  models.TripStop:
+    properties:
+      created_at:
+        example: "2023-12-01T12:37:59.008583Z"
+        type: string
+      days:
+        type: integer
+      highlights:
+        items:
+          $ref: '#/definitions/models.StopHighlight'
+        type: array
+      id:
+        example: 1
+        type: integer
+      latitude:
+        example: 13.404954
+        type: number
+      longitude:
+        example: 52.520008
+        type: number
+      stopName:
+        example: Berlin
+        type: string
+      trip_id:
+        type: integer
+      updated_at_at:
+        example: "2023-12-01T12:37:59.008583Z"
+        type: string
+    type: object
+  models.UpdateTripQueryInput:
+    properties:
+      country:
+        example: Germany
+        type: string
+      duration:
+        example: 10
+        type: integer
+      focus:
+        enum:
+        - Cities
+        - Nature
+        - Mixed
+        example: Mixed
+        type: string
+      id:
+        example: 1
+        type: integer
+      maximum_distance:
+        example: 1000
+        type: integer
+      secrets:
+        example: true
+        type: boolean
     required:
-    - email
-    - firstname
-    - lastname
+    - country
+    - duration
+    - focus
+    - id
+    - maximum_distance
+    - secrets
     type: object
 info:
   contact:
     email: support@swagger.io
     name: Vacaition API Support
     url: http://www.swagger.io/support
-  description: Swagger authentication is set to oauth to make login easier
+  description: This server is used for creating new trips
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -102,194 +186,195 @@ info:
   title: Trip API
   version: "1.0"
 paths:
-  /auth:
-    get:
-      consumes:
-      - application/json
-      description: This Endpoint is used to check token in cookie header. The JWT
-        token is additionally being refreshed.
-      operationId: check-token
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.AuthResponse'
-        "400":
-          description: Invalid input
-          schema:
-            $ref: '#/definitions/jsonHelper.HTTPError'
-        "401":
-          description: 'Invalid input: Invalid password'
-          schema:
-            $ref: '#/definitions/jsonHelper.HTTPError'
-        "404":
-          description: 'Invalid input: User not found'
-          schema:
-            $ref: '#/definitions/jsonHelper.HTTPError'
-        "500":
-          description: 'Invalid input: User Already exists'
-          schema:
-            $ref: '#/definitions/jsonHelper.HTTPError'
-      security:
-      - OAuth2Application:
-        - write
-        - admin
-      summary: Check Token validity
-      tags:
-      - Auth
-  /auth/login:
+  /trip:
     post:
       consumes:
       - application/json
-      description: This Endpoint is used to sign in a specific user
-      operationId: login-user
+      description: 'This endpoint can be used to create a trip. Requirements: authenticated'
+      operationId: create-trip
       parameters:
-      - description: User Input for login
+      - description: User Input creating a new trip
         in: body
-        name: loginUserInput
+        name: createTripInput
         required: true
         schema:
-          $ref: '#/definitions/models.SignInUserInput'
+          $ref: '#/definitions/models.CreateTripQueryInput'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.AuthResponse'
+            $ref: '#/definitions/models.Trip'
         "400":
-          description: Invalid input
+          description: In case of invalid createTrip DTO
           schema:
             $ref: '#/definitions/jsonHelper.HTTPError'
         "401":
-          description: 'Invalid input: Invalid password'
-          schema:
-            $ref: '#/definitions/jsonHelper.HTTPError'
-        "404":
-          description: 'Invalid input: User not found'
+          description: In case of unauthenticated request
           schema:
             $ref: '#/definitions/jsonHelper.HTTPError'
         "500":
-          description: 'Invalid input: User Already exists'
-          schema:
-            $ref: '#/definitions/jsonHelper.HTTPError'
-      summary: Sign in of an user
-      tags:
-      - Auth
-  /auth/logout:
-    get:
-      consumes:
-      - application/json
-      description: This Endpoint is used to logout a specific user and delete the
-        corresponding session cookie
-      operationId: logut-user
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.AuthResponse'
-      security:
-      - OAuth2Application:
-        - write
-        - admin
-      summary: Log out of an user
-      tags:
-      - Auth
-  /auth/signup:
-    post:
-      consumes:
-      - application/json
-      description: Register and create a new user
-      operationId: create-user
-      parameters:
-      - description: User Input for creating a new user
-        in: body
-        name: newUserInput
-        required: true
-        schema:
-          $ref: '#/definitions/models.RegisterUserInput'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.RegisterUserOutput'
-        "400":
-          description: Invalid input
-          schema:
-            $ref: '#/definitions/jsonHelper.HTTPError'
-        "500":
-          description: 'Invalid input: User Already exists'
-          schema:
-            $ref: '#/definitions/jsonHelper.HTTPError'
-      summary: Create a new user
-      tags:
-      - Auth
-  /auth/user:
-    get:
-      consumes:
-      - application/json
-      description: Get user info (for registered users)
-      operationId: get-user-info
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.User'
-        "400":
-          description: We need ID!!
-          schema:
-            $ref: '#/definitions/jsonHelper.HTTPError'
-        "404":
-          description: Can not find ID
+          description: In case of persistence error
           schema:
             $ref: '#/definitions/jsonHelper.HTTPError'
       security:
       - ApiKeyAuth: []
-      summary: Get user related data
+      summary: Create a new trip
       tags:
-      - Auth
-  /oauth:
-    get:
+      - Trip
+  /trip/{id}:
+    delete:
       consumes:
       - application/json
-      description: This Endpoint is used to login user via google oauth provider -
-        this endpoint triggers the process and redirects to the google authentication
-        service
-      operationId: login-oauth
+      description: 'This endpoint can be used delete a trip including its stops. Requirements:
+        authenticated'
+      operationId: delete-trip
       parameters:
-      - default: google
-        description: oauth provider
-        in: query
-        name: provider
-        type: string
+      - description: Trip ID
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
-      responses: {}
-      summary: Initiates login process using google oauth
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Trip'
+        "400":
+          description: In case of missing path param
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+        "401":
+          description: "In case of unauthenticated\trequest"
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+        "500":
+          description: "In case of persistence\terror"
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a trip
       tags:
-      - OAuth
-  /oauth/logout:
+      - Trip
     get:
       consumes:
       - application/json
-      description: This Endpoint is used to login user via google oauth provider -
-        this endpoint triggers the process and redirects to the google authentication
-        service
-      operationId: logoaut-oauth
+      description: 'This endpoint is used to query a trip. Requirements: authenticated
+        and requested trip is assigned to user'
+      operationId: get-trip
+      parameters:
+      - description: Trip ID
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
-      - text/html
-      responses: {}
-      summary: Logout process using google oauth
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Trip'
+        "400":
+          description: In case of missing path param
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+        "401":
+          description: In case of unauthenticated request
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+        "404":
+          description: In case non existing trip for given user
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+        "500":
+          description: "In case of\tpersistence error"
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+      security:
+      - ApiKeyAuth: []
+      summary: Get trip
       tags:
-      - OAuth
+      - Trip
+    put:
+      consumes:
+      - application/json
+      description: 'This endpoint can be used update a trip. This action deletes existing
+        stops and initiates a new calculation. Requirements: authenticated'
+      operationId: update-trip
+      parameters:
+      - description: User Input for updating a trip
+        in: body
+        name: updateTripInput
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateTripQueryInput'
+      - description: Trip ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Trip'
+        "400":
+          description: "In\tcase of invalid updateTrip DTO or missing path param"
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+        "401":
+          description: "In\tcase of unauthenticated\trequest"
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+        "500":
+          description: "In\tcase of persistence\terror"
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a trip
+      tags:
+      - Trip
+  /trips:
+    get:
+      consumes:
+      - application/json
+      description: 'This endpoint is used to query all trips of a given user. Requirements:
+        authenticated and requested trip is assigned to user'
+      operationId: get-trips
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Trip'
+            type: array
+        "401":
+          description: "In\tcase of\tunauthenticated\trequest"
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+        "404":
+          description: "In\tcase non existing trip for given user"
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+        "500":
+          description: "In\tcase of\tpersistence error"
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all trips
+      tags:
+      - Trip
 securityDefinitions:
   OAuth2Application:
     authorizationUrl: http://localhost:8080/userservice/api/oauth?provider=google

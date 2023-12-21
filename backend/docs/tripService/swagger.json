@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Swagger authentication is set to oauth to make login easier",
+        "description": "This server is used for creating new trips",
         "title": "Trip API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
@@ -17,17 +17,14 @@
     },
     "basePath": "/tripservice/api",
     "paths": {
-        "/auth": {
-            "get": {
+        "/trip": {
+            "post": {
                 "security": [
                     {
-                        "OAuth2Application": [
-                            "write",
-                            "admin"
-                        ]
+                        "ApiKeyAuth": []
                     }
                 ],
-                "description": "This Endpoint is used to check token in cookie header. The JWT token is additionally being refreshed.",
+                "description": "This endpoint can be used to create a trip. Requirements: authenticated",
                 "consumes": [
                     "application/json"
                 ],
@@ -35,37 +32,42 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Auth"
+                    "Trip"
                 ],
-                "summary": "Check Token validity",
-                "operationId": "check-token",
+                "summary": "Create a new trip",
+                "operationId": "create-trip",
+                "parameters": [
+                    {
+                        "description": "User Input creating a new trip",
+                        "name": "createTripInput",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateTripQueryInput"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.AuthResponse"
+                            "$ref": "#/definitions/models.Trip"
                         }
                     },
                     "400": {
-                        "description": "Invalid input",
+                        "description": "In case of invalid createTrip DTO",
                         "schema": {
                             "$ref": "#/definitions/jsonHelper.HTTPError"
                         }
                     },
                     "401": {
-                        "description": "Invalid input: Invalid password",
-                        "schema": {
-                            "$ref": "#/definitions/jsonHelper.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Invalid input: User not found",
+                        "description": "In case of unauthenticated request",
                         "schema": {
                             "$ref": "#/definitions/jsonHelper.HTTPError"
                         }
                     },
                     "500": {
-                        "description": "Invalid input: User Already exists",
+                        "description": "In case of persistence error",
                         "schema": {
                             "$ref": "#/definitions/jsonHelper.HTTPError"
                         }
@@ -73,152 +75,14 @@
                 }
             }
         },
-        "/auth/login": {
-            "post": {
-                "description": "This Endpoint is used to sign in a specific user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Sign in of an user",
-                "operationId": "login-user",
-                "parameters": [
-                    {
-                        "description": "User Input for login",
-                        "name": "loginUserInput",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.SignInUserInput"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.AuthResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid input",
-                        "schema": {
-                            "$ref": "#/definitions/jsonHelper.HTTPError"
-                        }
-                    },
-                    "401": {
-                        "description": "Invalid input: Invalid password",
-                        "schema": {
-                            "$ref": "#/definitions/jsonHelper.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Invalid input: User not found",
-                        "schema": {
-                            "$ref": "#/definitions/jsonHelper.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Invalid input: User Already exists",
-                        "schema": {
-                            "$ref": "#/definitions/jsonHelper.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/logout": {
-            "get": {
-                "security": [
-                    {
-                        "OAuth2Application": [
-                            "write",
-                            "admin"
-                        ]
-                    }
-                ],
-                "description": "This Endpoint is used to logout a specific user and delete the corresponding session cookie",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Log out of an user",
-                "operationId": "logut-user",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.AuthResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/signup": {
-            "post": {
-                "description": "Register and create a new user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Create a new user",
-                "operationId": "create-user",
-                "parameters": [
-                    {
-                        "description": "User Input for creating a new user",
-                        "name": "newUserInput",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.RegisterUserInput"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.RegisterUserOutput"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid input",
-                        "schema": {
-                            "$ref": "#/definitions/jsonHelper.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Invalid input: User Already exists",
-                        "schema": {
-                            "$ref": "#/definitions/jsonHelper.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/user": {
+        "/trip/{id}": {
             "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get user info (for registered users)",
+                "description": "This endpoint is used to query a trip. Requirements: authenticated and requested trip is assigned to user",
                 "consumes": [
                     "application/json"
                 ],
@@ -226,25 +90,163 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Auth"
+                    "Trip"
                 ],
-                "summary": "Get user related data",
-                "operationId": "get-user-info",
+                "summary": "Get trip",
+                "operationId": "get-trip",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Trip ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.User"
+                            "$ref": "#/definitions/models.Trip"
                         }
                     },
                     "400": {
-                        "description": "We need ID!!",
+                        "description": "In case of missing path param",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "In case of unauthenticated request",
                         "schema": {
                             "$ref": "#/definitions/jsonHelper.HTTPError"
                         }
                     },
                     "404": {
-                        "description": "Can not find ID",
+                        "description": "In case non existing trip for given user",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "In case of\tpersistence error",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint can be used update a trip. This action deletes existing stops and initiates a new calculation. Requirements: authenticated",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Trip"
+                ],
+                "summary": "Update a trip",
+                "operationId": "update-trip",
+                "parameters": [
+                    {
+                        "description": "User Input for updating a trip",
+                        "name": "updateTripInput",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateTripQueryInput"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Trip ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Trip"
+                        }
+                    },
+                    "400": {
+                        "description": "In\tcase of invalid updateTrip DTO or missing path param",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "In\tcase of unauthenticated\trequest",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "In\tcase of persistence\terror",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint can be used delete a trip including its stops. Requirements: authenticated",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Trip"
+                ],
+                "summary": "Delete a trip",
+                "operationId": "delete-trip",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Trip ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Trip"
+                        }
+                    },
+                    "400": {
+                        "description": "In case of missing path param",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "In case of unauthenticated\trequest",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "In case of persistence\terror",
                         "schema": {
                             "$ref": "#/definitions/jsonHelper.HTTPError"
                         }
@@ -252,47 +254,54 @@
                 }
             }
         },
-        "/oauth": {
+        "/trips": {
             "get": {
-                "description": "This Endpoint is used to login user via google oauth provider - this endpoint triggers the process and redirects to the google authentication service",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "OAuth"
-                ],
-                "summary": "Initiates login process using google oauth",
-                "operationId": "login-oauth",
-                "parameters": [
+                "security": [
                     {
-                        "type": "string",
-                        "default": "google",
-                        "description": "oauth provider",
-                        "name": "provider",
-                        "in": "query"
+                        "ApiKeyAuth": []
                     }
                 ],
-                "responses": {}
-            }
-        },
-        "/oauth/logout": {
-            "get": {
-                "description": "This Endpoint is used to login user via google oauth provider - this endpoint triggers the process and redirects to the google authentication service",
+                "description": "This endpoint is used to query all trips of a given user. Requirements: authenticated and requested trip is assigned to user",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
-                    "text/html"
+                    "application/json"
                 ],
                 "tags": [
-                    "OAuth"
+                    "Trip"
                 ],
-                "summary": "Logout process using google oauth",
-                "operationId": "logoaut-oauth",
-                "responses": {}
+                "summary": "Get all trips",
+                "operationId": "get-trips",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Trip"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "In\tcase of\tunauthenticated\trequest",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "In\tcase non existing trip for given user",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "In\tcase of\tpersistence error",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    }
+                }
             }
         }
     },
@@ -301,124 +310,237 @@
             "type": "object",
             "properties": {
                 "code": {
-                    "type": "integer",
-                    "example": 400
+                    "type": "integer"
                 },
                 "message": {
-                    "type": "string",
-                    "example": "status bad request"
+                    "type": "string"
                 }
             }
         },
-        "models.AuthResponse": {
+        "models.CreateTripQueryInput": {
             "type": "object",
             "required": [
-                "status"
+                "country",
+                "duration",
+                "focus",
+                "maximum_distance",
+                "secrets"
             ],
             "properties": {
-                "status": {
-                    "$ref": "#/definitions/models.LoginStatus"
-                }
-            }
-        },
-        "models.LoginStatus": {
-            "type": "integer",
-            "enum": [
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "LoggedIn",
-                "LoggedOut"
-            ]
-        },
-        "models.RegisterUserInput": {
-            "type": "object",
-            "required": [
-                "email",
-                "firstname",
-                "lastname",
-                "password"
-            ],
-            "properties": {
-                "email": {
+                "country": {
                     "type": "string",
-                    "example": "testuser@test.de"
+                    "example": "Germany"
                 },
-                "firstname": {
-                    "type": "string",
-                    "example": "testuser"
-                },
-                "lastname": {
-                    "type": "string",
-                    "example": "testuser"
-                },
-                "password": {
-                    "type": "string",
-                    "example": "test"
-                }
-            }
-        },
-        "models.RegisterUserOutput": {
-            "type": "object",
-            "required": [
-                "userId"
-            ],
-            "properties": {
-                "userId": {
+                "duration": {
                     "type": "integer",
-                    "example": 1
-                }
-            }
-        },
-        "models.SignInUserInput": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "testuser@test.de"
+                    "example": 10
                 },
-                "password": {
+                "focus": {
                     "type": "string",
-                    "example": "test"
+                    "enum": [
+                        "Cities",
+                        "Nature",
+                        "Mixed"
+                    ],
+                    "example": "Mixed"
+                },
+                "maximum_distance": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "secrets": {
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
-        "models.User": {
+        "models.StopHighlight": {
             "type": "object",
-            "required": [
-                "email",
-                "firstname",
-                "lastname"
-            ],
             "properties": {
                 "created_at": {
                     "type": "string",
                     "example": "2023-12-01T12:37:59.008583Z"
                 },
-                "email": {
+                "description": {
                     "type": "string",
-                    "example": "testuser"
-                },
-                "firstname": {
-                    "type": "string",
-                    "example": "testuser"
+                    "example": "The landmark of Berlin"
                 },
                 "id": {
                     "type": "integer",
                     "example": 1
                 },
-                "lastname": {
+                "latitude": {
+                    "type": "number",
+                    "example": 13.404954
+                },
+                "longitude": {
+                    "type": "number",
+                    "example": 52.520008
+                },
+                "name": {
                     "type": "string",
-                    "example": "testuser"
+                    "example": "Brandenburger Tor"
+                },
+                "stop_id": {
+                    "type": "integer"
                 },
                 "updated_at_at": {
                     "type": "string",
                     "example": "2023-12-01T12:37:59.008583Z"
+                }
+            }
+        },
+        "models.Trip": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2023-12-01T12:37:59.008583Z"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "query": {
+                    "$ref": "#/definitions/models.TripQuery"
+                },
+                "stops": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.TripStop"
+                    }
+                },
+                "updated_at_at": {
+                    "type": "string",
+                    "example": "2023-12-01T12:37:59.008583Z"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "1"
+                }
+            }
+        },
+        "models.TripQuery": {
+            "type": "object",
+            "properties": {
+                "country": {
+                    "type": "string",
+                    "example": "Germany"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2023-12-01T12:37:59.008583Z"
+                },
+                "duration": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "focus": {
+                    "type": "string",
+                    "enum": [
+                        "Cities",
+                        "Nature",
+                        "Mixed"
+                    ],
+                    "example": "Mixed"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "maximum_distance": {
+                    "type": "integer",
+                    "example": 1000
+                },
+                "secrets": {
+                    "type": "boolean"
+                },
+                "updated_at_at": {
+                    "type": "string",
+                    "example": "2023-12-01T12:37:59.008583Z"
+                }
+            }
+        },
+        "models.TripStop": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2023-12-01T12:37:59.008583Z"
+                },
+                "days": {
+                    "type": "integer"
+                },
+                "highlights": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.StopHighlight"
+                    }
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "latitude": {
+                    "type": "number",
+                    "example": 13.404954
+                },
+                "longitude": {
+                    "type": "number",
+                    "example": 52.520008
+                },
+                "stopName": {
+                    "type": "string",
+                    "example": "Berlin"
+                },
+                "trip_id": {
+                    "type": "integer"
+                },
+                "updated_at_at": {
+                    "type": "string",
+                    "example": "2023-12-01T12:37:59.008583Z"
+                }
+            }
+        },
+        "models.UpdateTripQueryInput": {
+            "type": "object",
+            "required": [
+                "country",
+                "duration",
+                "focus",
+                "id",
+                "maximum_distance",
+                "secrets"
+            ],
+            "properties": {
+                "country": {
+                    "type": "string",
+                    "example": "Germany"
+                },
+                "duration": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "focus": {
+                    "type": "string",
+                    "enum": [
+                        "Cities",
+                        "Nature",
+                        "Mixed"
+                    ],
+                    "example": "Mixed"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "maximum_distance": {
+                    "type": "integer",
+                    "example": 1000
+                },
+                "secrets": {
+                    "type": "boolean",
+                    "example": true
                 }
             }
         }

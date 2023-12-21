@@ -18,9 +18,7 @@ import (
 
 //	@title			Trip API
 //	@version		1.0
-//	@description	This server is used for creating new users and conduct authentication
-//	@descripition	It is possible to sign up using email and password or using the oauth google client
-//	@description	Swagger authentication is set to oauth to make login easier
+//	@description	This server is used for creating new trips
 //	@termsOfService	http://swagger.io/terms/
 
 //	@contact.name	Vacaition API Support
@@ -30,9 +28,9 @@ import (
 //	@license.name	Apache 2.0
 //	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 
-//	@Tags	Auth, OAuth
+//	@Tags	Trip, Stop
 
-// 	@BasePath	/tripservice/api
+//	@BasePath	/tripservice/api
 
 //	@securitydefinitions.oauth2.implicit	OAuth2Application
 //	@authorizationurl						http://localhost:8080/userservice/api/oauth?provider=google

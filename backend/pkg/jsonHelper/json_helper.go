@@ -69,6 +69,6 @@ func HttpErrorResponse(w http.ResponseWriter, status int, err error) {
 
 // HTTPError
 type HTTPError struct {
-	Code    int    `json:"code" example:"400"`
-	Message string `json:"message" example:"status bad request"`
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }

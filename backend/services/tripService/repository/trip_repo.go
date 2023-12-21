@@ -13,7 +13,7 @@ type TripRepo interface {
 	GetTrip(id string, userId string) (res *models.Trip, err error)
 	GetTrips(userId string) (res []models.Trip, err error)
 	UpdateTrip(updateTripInput *models.UpdateTripQueryInput, userId string) (res *models.Trip, err error)
-	DeleteTrip(id string, userId string) (err error)
+	DeleteTrip(id string, userId string) (res *models.Trip, err error)
 }
 
 func (r *GormRepository) CreateTrip(createTripInput *models.CreateTripQueryInput, userId string) (trip *models.Trip, err error) {
@@ -107,13 +107,14 @@ func (r *GormRepository) UpdateTrip(updateTripInput *models.UpdateTripQueryInput
 	return &trip, transactionError
 }
 
-func (r *GormRepository) DeleteTrip(tripId string, userId string) error {
+func (r *GormRepository) DeleteTrip(tripId string, userId string) (*models.Trip, error) {
 
-	result := r.db.Database.Where("user_id = ? AND id = ?", userId, tripId).Delete(&models.Trip{})
+	trip := &models.Trip{}
+	result := r.db.Database.Where("user_id = ? AND id = ?", userId, tripId).Delete(trip)
 
 	if result.RowsAffected == 0 {
-		return errors.New("User does not have a trip with id: " + tripId)
+		return trip, errors.New("User does not have a trip with id: " + tripId)
 	}
 
-	return result.Error
+	return trip, result.Error
 }

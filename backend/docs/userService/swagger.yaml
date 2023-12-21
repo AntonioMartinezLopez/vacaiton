@@ -3,10 +3,8 @@ definitions:
   jsonHelper.HTTPError:
     properties:
       code:
-        example: 400
         type: integer
       message:
-        example: status bad request
         type: string
     type: object
   models.AuthResponse:

@@ -10,23 +10,23 @@ type TripQuery struct {
 	Duration        int        `json:"duration" example:"10"`
 	Secrets         bool       `json:"secrets" gorm:"default:false"`
 	MaximumDistance int        `json:"maximum_distance" example:"1000"`
-	Focus           TripFocus  `json:"focus" sql:"type:enum('cities','nature','mixed');default:'mixed'" gorm:"embedded"`
+	Focus           TripFocus  `json:"focus" sql:"type:enum('Cities','Nature','Mixed');default:'Mixed'" swaggertype:"string" enums:"Cities,Nature,Mixed" example:"Mixed"`
 	TripID          uint       `json:"-"`
 }
 
 type CreateTripQueryInput struct {
 	Country         string    `json:"country" binding:"required" example:"Germany" validate:"required"`
 	Duration        int       `json:"duration" binding:"required" example:"10" validate:"required"`
-	Secrets         bool      `json:"secrets" binding:"required" validate:"required"`
-	MaximumDistance int       `json:"maximum_distance" binding:"required" example:"1000" validate:"required"`
-	Focus           TripFocus `json:"focus" binding:"required"`
+	Secrets         bool      `json:"secrets" binding:"required" example:"true" validate:"required"`
+	MaximumDistance int       `json:"maximum_distance" binding:"required" example:"100" validate:"required"`
+	Focus           TripFocus `json:"focus" binding:"required" example:"Mixed" swaggertype:"string" enums:"Cities,Nature,Mixed"`
 }
 
 type UpdateTripQueryInput struct {
 	Id              uint      `json:"id" example:"1" validate:"required"`
 	Country         string    `json:"country" example:"Germany" validate:"required"`
 	Duration        int       `json:"duration" example:"10" validate:"required"`
-	Secrets         bool      `json:"secrets" validate:"required"`
+	Secrets         bool      `json:"secrets" example:"true" validate:"required"`
 	MaximumDistance int       `json:"maximum_distance" example:"1000" validate:"required"`
-	Focus           TripFocus `json:"focus"`
+	Focus           TripFocus `json:"focus" binding:"required" example:"Mixed" swaggertype:"string" enums:"Cities,Nature,Mixed"`
 }

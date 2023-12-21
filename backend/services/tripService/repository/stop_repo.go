@@ -26,18 +26,20 @@ func (r *GormRepository) CreateStop(createStopInput *models.CreateStopInput, use
 		newHighlight := models.StopHighlight{
 			Name:        highlightInput.Name,
 			Description: highlightInput.Description,
-			Coordinates: highlightInput.Coordinates,
+			Long:        highlightInput.Long,
+			Lat:         highlightInput.Lat,
 		}
 		highlights[i] = newHighlight
 	}
 
 	// create new stop
 	newStop := models.TripStop{
-		Name:        createStopInput.Stop.Name,
-		Coordinates: createStopInput.Stop.Coordinates,
-		Days:        createStopInput.Stop.Days,
-		Highlights:  highlights,
-		TripID:      createStopInput.TripId,
+		Name:       createStopInput.Stop.Name,
+		Long:       createStopInput.Stop.Long,
+		Lat:        createStopInput.Stop.Lat,
+		Days:       createStopInput.Stop.Days,
+		Highlights: highlights,
+		TripID:     createStopInput.TripId,
 	}
 
 	result := r.db.Database.Create(&newStop)
@@ -75,18 +77,20 @@ func (r *GormRepository) CreateStops(createStopsInput *models.CreateStopsInput, 
 				newHighlight := models.StopHighlight{
 					Name:        highlightInput.Name,
 					Description: highlightInput.Description,
-					Coordinates: highlightInput.Coordinates,
+					Long:        highlightInput.Long,
+					Lat:         highlightInput.Lat,
 				}
 				highlights[j] = newHighlight
 			}
 
 			// Step 2: Create all stops
 			newStop := models.TripStop{
-				Name:        stopInput.Name,
-				Coordinates: stopInput.Coordinates,
-				Days:        stopInput.Days,
-				Highlights:  highlights,
-				TripID:      createStopsInput.TripId,
+				Name:       stopInput.Name,
+				Long:       stopInput.Long,
+				Lat:        stopInput.Lat,
+				Days:       stopInput.Days,
+				Highlights: highlights,
+				TripID:     createStopsInput.TripId,
 			}
 
 			newStops[i] = newStop
