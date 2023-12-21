@@ -22,13 +22,19 @@ docker compose down -v
 go install github.com/swaggo/swag/cmd/swag@latest
 ```
 
-2. Generate docs
+2. Switch to service of interest
 
 ```bash
-$GOPATH/bin/swag init -o ./docs/<serviceName> -g services/userService/main.go
+cd backend/services/<serviceName>
 ```
 
-3. Include generated file in swagger handler (You may adapt the oauth authorization url as it cannot be changed dynamically)
+3. Generate docs
+
+```bash
+$GOPATH/bin/swag init -o ../../docs/<serviceName> --parseDependency --parseInternal -g main.go
+```
+
+4. Include generated file in swagger handler (You may adapt the oauth authorization url as it cannot be changed dynamically)
 
 ```go
 import (
