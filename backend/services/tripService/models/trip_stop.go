@@ -30,6 +30,6 @@ type CreateStopInput struct {
 }
 
 type CreateStopsInput struct {
-	Stops  []TripStopInput `json:"stop" validate:"required,dive,required"`
+	Stops  []TripStopInput `json:"stops" validate:"required,dive,required"`
 	TripId uint            `json:"trip_id" example:"1"`
 }

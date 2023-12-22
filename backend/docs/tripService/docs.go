@@ -24,6 +24,137 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/stop": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint can be used to add a stop to an existing trip. Requirements: authenticated",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Stop"
+                ],
+                "summary": "Create a new stop",
+                "operationId": "create-stop",
+                "parameters": [
+                    {
+                        "description": "User Input for creating a new stop",
+                        "name": "CreateStopInput",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateStopInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.TripStop"
+                        }
+                    },
+                    "400": {
+                        "description": "In case of invalid CreateStop DTO",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "In case of unauthenticated request",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "In case of unknown trip id",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "In case of persistence error",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/stops": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint can be used to multiple stops to an existing trip. Requirements: authenticated",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Stop"
+                ],
+                "summary": "Create multiple stops",
+                "operationId": "create-stops",
+                "parameters": [
+                    {
+                        "description": "User Input for creating new stops",
+                        "name": "CreateStopsInput",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateStopsInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.TripStop"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "In case of invalid CreateStops DTO",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "In case of unauthenticated request",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "In case of unknown trip id",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "In case of persistence error",
+                        "schema": {
+                            "$ref": "#/definitions/jsonHelper.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/trip": {
             "post": {
                 "security": [
@@ -199,7 +330,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "In\tcase of persistence\terror",
+                        "description": "In\tcase of persistence\t\terror",
                         "schema": {
                             "$ref": "#/definitions/jsonHelper.HTTPError"
                         }
@@ -253,7 +384,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "In case of persistence\terror",
+                        "description": "In case of persistence\t\terror",
                         "schema": {
                             "$ref": "#/definitions/jsonHelper.HTTPError"
                         }
@@ -321,6 +452,39 @@ const docTemplate = `{
                 },
                 "message": {
                     "type": "string"
+                }
+            }
+        },
+        "models.CreateStopInput": {
+            "type": "object",
+            "required": [
+                "stop"
+            ],
+            "properties": {
+                "stop": {
+                    "$ref": "#/definitions/models.TripStopInput"
+                },
+                "trip_id": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "models.CreateStopsInput": {
+            "type": "object",
+            "required": [
+                "stops"
+            ],
+            "properties": {
+                "stops": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.TripStopInput"
+                    }
+                },
+                "trip_id": {
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -394,6 +558,31 @@ const docTemplate = `{
                 "updated_at_at": {
                     "type": "string",
                     "example": "2023-12-01T12:37:59.008583Z"
+                }
+            }
+        },
+        "models.StopHighlightInput": {
+            "type": "object",
+            "required": [
+                "description",
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "The landmark of Berlin"
+                },
+                "latitude": {
+                    "type": "number",
+                    "example": 13.404954
+                },
+                "longitude": {
+                    "type": "number",
+                    "example": 52.520008
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Brandenburger Tor"
                 }
             }
         },
@@ -506,6 +695,35 @@ const docTemplate = `{
                 "updated_at_at": {
                     "type": "string",
                     "example": "2023-12-01T12:37:59.008583Z"
+                }
+            }
+        },
+        "models.TripStopInput": {
+            "type": "object",
+            "required": [
+                "highlights"
+            ],
+            "properties": {
+                "days": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "highlights": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.StopHighlightInput"
+                    }
+                },
+                "latitude": {
+                    "type": "number",
+                    "example": 13.404954
+                },
+                "longitude": {
+                    "type": "number",
+                    "example": 52.520008
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },

@@ -134,7 +134,7 @@ func (h *TripHandler) GetTrips(w http.ResponseWriter, request *http.Request) {
 //	@Success		200				{object}	models.Trip
 //	@Failure		400				{object}	jsonHelper.HTTPError	"In	case of invalid updateTrip DTO or missing path param"
 //	@Failure		401				{object}	jsonHelper.HTTPError	"In	case of unauthenticated	request"
-//	@Failure		500				{object}	jsonHelper.HTTPError	"In	case of persistence	error"
+//	@Failure		500				{object}	jsonHelper.HTTPError	"In	case of persistence		error"
 //	@Router			/trip/{id} [put]
 //	@Security		ApiKeyAuth
 func (h *TripHandler) UpdateTrip(w http.ResponseWriter, request *http.Request) {
@@ -180,7 +180,7 @@ func (h *TripHandler) UpdateTrip(w http.ResponseWriter, request *http.Request) {
 //	@Success		200	{object}	models.Trip
 //	@Failure		400	{object}	jsonHelper.HTTPError	"In case of missing path param"
 //	@Failure		401	{object}	jsonHelper.HTTPError	"In case of unauthenticated	request"
-//	@Failure		500	{object}	jsonHelper.HTTPError	"In case of persistence	error"
+//	@Failure		500	{object}	jsonHelper.HTTPError	"In case of persistence		error"
 //	@Router			/trip/{id} [delete]
 //	@Security		ApiKeyAuth
 func (h *TripHandler) DeleteTrip(w http.ResponseWriter, request *http.Request) {

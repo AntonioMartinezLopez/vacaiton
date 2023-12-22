@@ -7,6 +7,28 @@ definitions:
       message:
         type: string
     type: object
+  models.CreateStopInput:
+    properties:
+      stop:
+        $ref: '#/definitions/models.TripStopInput'
+      trip_id:
+        example: 1
+        type: integer
+    required:
+    - stop
+    type: object
+  models.CreateStopsInput:
+    properties:
+      stops:
+        items:
+          $ref: '#/definitions/models.TripStopInput'
+        type: array
+      trip_id:
+        example: 1
+        type: integer
+    required:
+    - stops
+    type: object
   models.CreateTripQueryInput:
     properties:
       country:
@@ -60,6 +82,24 @@ definitions:
       updated_at_at:
         example: "2023-12-01T12:37:59.008583Z"
         type: string
+    type: object
+  models.StopHighlightInput:
+    properties:
+      description:
+        example: The landmark of Berlin
+        type: string
+      latitude:
+        example: 13.404954
+        type: number
+      longitude:
+        example: 52.520008
+        type: number
+      name:
+        example: Brandenburger Tor
+        type: string
+    required:
+    - description
+    - name
     type: object
   models.Trip:
     properties:
@@ -141,6 +181,26 @@ definitions:
         example: "2023-12-01T12:37:59.008583Z"
         type: string
     type: object
+  models.TripStopInput:
+    properties:
+      days:
+        example: 10
+        type: integer
+      highlights:
+        items:
+          $ref: '#/definitions/models.StopHighlightInput'
+        type: array
+      latitude:
+        example: 13.404954
+        type: number
+      longitude:
+        example: 52.520008
+        type: number
+      name:
+        type: string
+    required:
+    - highlights
+    type: object
   models.UpdateTripQueryInput:
     properties:
       country:
@@ -186,6 +246,92 @@ info:
   title: Trip API
   version: "1.0"
 paths:
+  /stop:
+    post:
+      consumes:
+      - application/json
+      description: 'This endpoint can be used to add a stop to an existing trip. Requirements:
+        authenticated'
+      operationId: create-stop
+      parameters:
+      - description: User Input for creating a new stop
+        in: body
+        name: CreateStopInput
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateStopInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TripStop'
+        "400":
+          description: In case of invalid CreateStop DTO
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+        "401":
+          description: In case of unauthenticated request
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+        "404":
+          description: In case of unknown trip id
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+        "500":
+          description: In case of persistence error
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new stop
+      tags:
+      - Stop
+  /stops:
+    post:
+      consumes:
+      - application/json
+      description: 'This endpoint can be used to multiple stops to an existing trip.
+        Requirements: authenticated'
+      operationId: create-stops
+      parameters:
+      - description: User Input for creating new stops
+        in: body
+        name: CreateStopsInput
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateStopsInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.TripStop'
+            type: array
+        "400":
+          description: In case of invalid CreateStops DTO
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+        "401":
+          description: In case of unauthenticated request
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+        "404":
+          description: In case of unknown trip id
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+        "500":
+          description: In case of persistence error
+          schema:
+            $ref: '#/definitions/jsonHelper.HTTPError'
+      security:
+      - ApiKeyAuth: []
+      summary: Create multiple stops
+      tags:
+      - Stop
   /trip:
     post:
       consumes:
@@ -252,7 +398,7 @@ paths:
           schema:
             $ref: '#/definitions/jsonHelper.HTTPError'
         "500":
-          description: "In case of persistence\terror"
+          description: "In case of persistence\t\terror"
           schema:
             $ref: '#/definitions/jsonHelper.HTTPError'
       security:
@@ -334,7 +480,7 @@ paths:
           schema:
             $ref: '#/definitions/jsonHelper.HTTPError'
         "500":
-          description: "In\tcase of persistence\terror"
+          description: "In\tcase of persistence\t\terror"
           schema:
             $ref: '#/definitions/jsonHelper.HTTPError'
       security:
