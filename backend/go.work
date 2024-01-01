@@ -4,5 +4,6 @@ use (
 	./pkg
 	./services/userService
 	./services/tripService
+	./services/tripBuilderService
 	./docs
 )

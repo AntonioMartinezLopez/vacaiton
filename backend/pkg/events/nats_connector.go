@@ -7,6 +7,15 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
+type NatsConnectorInterface interface {
+	NatsJetStream() (nats.JetStreamContext, error)
+	CreateStream(name string, subjects []string) (*nats.StreamInfo, error)
+	PublishStream(subject string, message []byte) error
+	PublishStreamAsync(subject string, message []byte) error
+	PublishAsyncFinished() <-chan struct{}
+	QueueSubscribe(stream string, subject string, group string, handler func(*nats.Msg)) (nats.Subscription, error)
+}
+
 type NatsConnector struct {
 	Connection *nats.Conn
 }
@@ -93,4 +102,15 @@ func (nc *NatsConnector) PublishAsyncFinished() <-chan struct{} {
 	}
 
 	return jsCtx.PublishAsyncComplete()
+}
+
+func (nc *NatsConnector) QueueSubscribe(stream string, subject string, group string, handler func(*nats.Msg)) (*nats.Subscription, error) {
+
+	jsCtx, err := nc.NatsJetStream()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return jsCtx.QueueSubscribe(subject, group, handler)
 }
