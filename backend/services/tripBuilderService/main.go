@@ -7,12 +7,15 @@ import (
 	"backend/pkg/events"
 	"backend/pkg/logger"
 	"backend/services/tripBuilderService/config"
+	"context"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/nats-io/nats.go"
+	"github.com/sashabaranov/go-openai"
+	"github.com/spf13/viper"
 )
 
 func forever() {
@@ -42,6 +45,7 @@ func main() {
 
 	natsConnector.QueueSubscribe("FOO", "TRIP_CREATED", "testgroup", func(m *nats.Msg) {
 		logger.Log("Message: " + string(m.Data))
+		gptQuery(string(m.Data))
 	})
 
 	// go forever()
@@ -51,5 +55,63 @@ func main() {
 	<-quitChannel
 	//time for cleanup before exit
 	logger.Info("Shutting down.")
+
+}
+
+var modeldescription = `You are an API from  travel agency. Your task is to plan roundtrip with several stops based on the given input. The input is in JSON format and contains the following keys:
+
+"""
+country: The name of the country where the roundtrip should take place (type string)
+duration: The number of days the user wants to spend in the given country (type number)
+focus: the main focus of the trip. This field can only contain either "cities" or "nature" or "cities and nature" (type enum)
+secrets: a flag whether to show the all known places within a country or rather the hidden secrets places (type boolean)
+maximum_distance: the maximum distance between stops in kilometers. (type number)
+"""
+
+As an API you will return an array of objects that define each stop, respectively. To fullfill your task procedure as followed explained delimited by triple dashes:
+---
+Step 1 : Find a location in the given country.  If the input 'secret' value is set to true then find a destination that can be seen as a hidden secret. If input 'secret' is false then pick a famous destination. Additionally the location should match with the given focus input of the user. Please consider the following cases delimited by triple quotes:
+"""
+- If "nature" is given as focus, you have to find a stop in the nature (nature reserve, mountains,  or rural cities with possibility to explore the nature. Avoid larger cities.
+- If "cities" is given as focus, select cities with large cultural offerings
+- If "cities and nature " is given for the focus field, try to find a balanced mix of stops that belong to "nature" or "cities" focus. For that you have to check what kind of stops were created before in the previous steps, and set the stops alternately.
+"""
+
+Step 2: Determine the coordinates of the selected location and check whether the location is within the given country.
+
+Step 3: Calculate the recommended number of days to spent at a given stop. Check that the accumulative number of days of all stops does not exceed the value of the duration field of the user input by more than one day. The number of days should be maximum 1/4 of the total number of days for the round trip.
+
+Step 4: Find three to four recommended activities for the selected stop. Double check whether the found activities are within that area and make sure that these activities really fit to the focus type of the round trip, e.g. if "nature" is selected as focus do not return sight seeing destinations within a city. Also avoid unspecific activities that include large areas like "explore Baden-Baden".
+
+Step 5:  Based on the collect information create an object containing the following fields:
+"""
+name: The name of the stop based on the location 
+location: the coordiantes of the location in longitude and latitude
+num_days: The number of days the user is being recommended to stay at the stop
+highlights: An array of short recommendations with concrete examples. Each example should again be an object including the specific location name of the activity (fieldname: "location"),   the coordinates (fieldname: "coordinates"), and a short description of the activity (fieldname: "description").
+"""
+
+Step 6: Add this object to the Array. If there a days remaining to be planned go to step 1. Try to use all days that were given by the user for the tour planning.
+
+Step 7: Return the array in JSON format.
+---`
+
+func gptQuery(data string) {
+	client := openai.NewClient(viper.GetString("OPENAI_SECRET"))
+	resp, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+		Model:          openai.GPT4TurboPreview,
+		ResponseFormat: &openai.ChatCompletionResponseFormat{Type: openai.ChatCompletionResponseFormatTypeJSONObject},
+		Messages: []openai.ChatCompletionMessage{
+			{Role: "system", Content: modeldescription},
+			{Role: "user", Content: data},
+		},
+	})
+
+	if err != nil {
+		logger.Error(err.Error())
+		// send Error event to messaging system
+	}
+
+	logger.Info(resp.Choices[0].Message.Content)
 
 }
