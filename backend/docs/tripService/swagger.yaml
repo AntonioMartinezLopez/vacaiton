@@ -31,9 +31,6 @@ definitions:
     type: object
   models.CreateTripQueryInput:
     properties:
-      country:
-        example: Germany
-        type: string
       duration:
         example: 10
         type: integer
@@ -44,6 +41,9 @@ definitions:
         - Mixed
         example: Mixed
         type: string
+      location:
+        example: Germany
+        type: string
       maximum_distance:
         example: 100
         type: integer
@@ -51,9 +51,9 @@ definitions:
         example: true
         type: boolean
     required:
-    - country
     - duration
     - focus
+    - location
     - maximum_distance
     - secrets
     type: object
@@ -124,9 +124,6 @@ definitions:
     type: object
   models.TripQuery:
     properties:
-      country:
-        example: Germany
-        type: string
       created_at:
         example: "2023-12-01T12:37:59.008583Z"
         type: string
@@ -143,6 +140,9 @@ definitions:
       id:
         example: 1
         type: integer
+      location:
+        example: Germany
+        type: string
       maximum_distance:
         example: 1000
         type: integer
@@ -203,9 +203,6 @@ definitions:
     type: object
   models.UpdateTripQueryInput:
     properties:
-      country:
-        example: Germany
-        type: string
       duration:
         example: 10
         type: integer
@@ -219,6 +216,9 @@ definitions:
       id:
         example: 1
         type: integer
+      location:
+        example: Germany
+        type: string
       maximum_distance:
         example: 1000
         type: integer
@@ -226,10 +226,10 @@ definitions:
         example: true
         type: boolean
     required:
-    - country
     - duration
     - focus
     - id
+    - location
     - maximum_distance
     - secrets
     type: object

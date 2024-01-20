@@ -491,17 +491,13 @@ const docTemplate = `{
         "models.CreateTripQueryInput": {
             "type": "object",
             "required": [
-                "country",
                 "duration",
                 "focus",
+                "location",
                 "maximum_distance",
                 "secrets"
             ],
             "properties": {
-                "country": {
-                    "type": "string",
-                    "example": "Germany"
-                },
                 "duration": {
                     "type": "integer",
                     "example": 10
@@ -514,6 +510,10 @@ const docTemplate = `{
                         "Mixed"
                     ],
                     "example": "Mixed"
+                },
+                "location": {
+                    "type": "string",
+                    "example": "Germany"
                 },
                 "maximum_distance": {
                     "type": "integer",
@@ -619,10 +619,6 @@ const docTemplate = `{
         "models.TripQuery": {
             "type": "object",
             "properties": {
-                "country": {
-                    "type": "string",
-                    "example": "Germany"
-                },
                 "created_at": {
                     "type": "string",
                     "example": "2023-12-01T12:37:59.008583Z"
@@ -643,6 +639,10 @@ const docTemplate = `{
                 "id": {
                     "type": "integer",
                     "example": 1
+                },
+                "location": {
+                    "type": "string",
+                    "example": "Germany"
                 },
                 "maximum_distance": {
                     "type": "integer",
@@ -730,18 +730,14 @@ const docTemplate = `{
         "models.UpdateTripQueryInput": {
             "type": "object",
             "required": [
-                "country",
                 "duration",
                 "focus",
                 "id",
+                "location",
                 "maximum_distance",
                 "secrets"
             ],
             "properties": {
-                "country": {
-                    "type": "string",
-                    "example": "Germany"
-                },
                 "duration": {
                     "type": "integer",
                     "example": 10
@@ -758,6 +754,10 @@ const docTemplate = `{
                 "id": {
                     "type": "integer",
                     "example": 1
+                },
+                "location": {
+                    "type": "string",
+                    "example": "Germany"
                 },
                 "maximum_distance": {
                     "type": "integer",

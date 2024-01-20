@@ -21,7 +21,7 @@ func (r *GormRepository) CreateTrip(createTripInput *models.CreateTripQueryInput
 	// create new trip
 	newTrip := models.Trip{
 		Query: models.TripQuery{
-			Country:         createTripInput.Country,
+			Location:        createTripInput.Location,
 			Duration:        createTripInput.Duration,
 			Secrets:         createTripInput.Secrets,
 			MaximumDistance: createTripInput.MaximumDistance,
@@ -46,7 +46,7 @@ func (r *GormRepository) GetTrip(tripId string, userId string) (*models.Trip, er
 		return &trip, errors.New("Unknown trip id for given user")
 	}
 
-	logger.Log("Country" + trip.Query.Country)
+	logger.Log("Location" + trip.Query.Location)
 
 	return &trip, result.Error
 }
@@ -88,7 +88,7 @@ func (r *GormRepository) UpdateTrip(updateTripInput *models.UpdateTripQueryInput
 
 		// overwrite query object and reset all stops
 		trip.Query = models.TripQuery{
-			Country:         updateTripInput.Country,
+			Location:        updateTripInput.Location,
 			Duration:        updateTripInput.Duration,
 			Secrets:         updateTripInput.Secrets,
 			MaximumDistance: updateTripInput.MaximumDistance,
